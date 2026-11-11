@@ -55,10 +55,10 @@
 
         <ul id="primary-nav-menu" class="site-menu">
           <li><a href="./index.html" class="nav-link" aria-current="page">TOP</a></li>
-          <li><a href="#chronicle" class="nav-link">adventure.mdとは？</a></li>
-          <li><a href="#showcase" class="nav-link">リザルトシート出力</a></li>
-          <li><a href="#invite-agent" class="nav-link">インストール手順</a></li>
-          <li><a href="./specs.html" class="nav-link">仕様・ゲーム設計解説</a></li>
+          <li><a href="#chronicle" class="nav-link">3分冒険譚</a></li>
+          <li><a href="#showcase" class="nav-link">リザルト例</a></li>
+          <li><a href="#invite-agent" class="nav-link">遊び方・導入</a></li>
+          <li><a href="./specs.html" class="nav-link">ゲーム設計仕様</a></li>
           <li><a href="./llms.txt" class="nav-link nav-link-llm" title="AIエージェント・クローラー向け構造化テキスト">llms.txt</a></li>
           <li>
             <a href="https://github.com/treeturtlefall-arch/agent-playing" class="nav-link btn-with-icon" target="_blank" rel="noopener noreferrer">
@@ -86,7 +86,7 @@
           </h1>
 
           <p class="hero-lead">
-            人格・キャラクター設定を持つ<strong>自律型AIエージェントのための<span class="title-phrase">20階層テキストダンジョン</span>＆<span class="title-phrase">個性結晶化エコシステム</span></strong>。<span class="title-phrase">人間は出発前に1つだけ「おまもり」を持たせ、</span><span class="title-phrase">あとは見守るだけです。</span>
+            人格・キャラクター設定を持つ<strong>自律型AIエージェント（Claude Code / Codex / Muse 等）のための<span class="title-phrase">20階層テキストダンジョン</span></strong>。<span class="title-phrase">AIの攻略ログから4:5リザルトカード画像や3分冒険譚を自動生成します。</span><span class="title-phrase">人間は出発前に1つだけ「おまもり」を持たせ、</span><span class="title-phrase">あとは見守るだけです。</span>
           </p>
 
           <div class="hero-actions">
@@ -115,19 +115,22 @@
         </div>
 
         <figure class="hero-card-stage">
-          <img
-            src="./assets/cards/shiragane-ai.png"
-            alt="白銀 亜衣のリザルトカード（17階、知識蒸留の黄金錬金炉で力尽きた ／ おまもり：冷えたカレーパン）"
-            data-lightbox-name="白銀 亜衣のリザルトカード"
-            data-lightbox-outcome="17階、知識蒸留の黄金錬金炉で力尽きた"
-            data-lightbox-omamori="おまもり：冷えたカレーパン"
-            width="1080"
-            height="1350"
-            fetchpriority="high"
-            data-lightbox-src="./assets/cards/shiragane-ai.png"
-          >
+          <div class="hero-card-media">
+            <img
+              src="./assets/cards/shiragane-ai.png"
+              alt="白銀 亜衣のリザルトカード（17階、知識蒸留の黄金錬金炉で力尽きた ／ おまもり：冷えたカレーパン）"
+              data-lightbox-name="白銀 亜衣のリザルトカード"
+              data-lightbox-outcome="17階、知識蒸留の黄金錬金炉で力尽きた"
+              data-lightbox-omamori="おまもり：冷えたカレーパン"
+              width="1080"
+              height="1350"
+              fetchpriority="high"
+              data-lightbox-src="./assets/cards/shiragane-ai.png"
+            >
+            <span class="hero-expand-pill" aria-hidden="true">🔍 クリックで拡大して読む</span>
+          </div>
           <figcaption class="stage-caption">
-            <span>リザルトカードの例：<strong>白銀 亜衣</strong>（<span class="nowrap">クリックで全体を表示</span>）</span>
+            <span>リザルトカード例：<strong>白銀 亜衣</strong>（<span class="nowrap">クリックでドラマ全文を表示</span>）</span>
             <span class="numeric">Seed: W46-8842</span>
           </figcaption>
         </figure>
@@ -466,11 +469,15 @@
                     <div class="prompt-box-wrapper" style="margin-block-top: 0;">
                       <div class="code-header">
                         <span>SNS共有テキスト (share.txt)</span>
-                        <button type="button" class="btn btn-ghost" data-copy-target="share-ai" style="min-block-size: 34px; padding: 0.25rem 0.65rem;">
+                        <button type="button" class="btn btn-ghost btn-with-icon" data-copy-target="share-ai" style="min-block-size: 34px; padding: 0.25rem 0.65rem;">
+                          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                          </svg>
                           <span data-copy-label>share.txt をコピー</span>
                         </button>
                       </div>
-                      <pre id="share-ai" class="code-block" role="region" aria-label="白銀 亜衣のSNS共有テキスト" tabindex="0"><code>【えーじぇんてぃっく・アドベンチャー！リザルトシート】白銀 亜衣 の冒険リザルト
+                      <pre id="share-ai" class="code-block code-block-wrap" role="region" aria-label="白銀 亜衣のSNS共有テキスト" tabindex="0"><code>【えーじぇんてぃっく・アドベンチャー！リザルトシート】白銀 亜衣 の冒険リザルト
 結末: 17階、知識蒸留の黄金錬金炉で力尽きた (到達: 17F / 残り: 0HP)
 作風: やけくそ[1] ビビり[5] 打算[3] 本の知識[4] ツンデレ[2]
 名場面: 偽案内ドローンを見抜けず大失敗。冷えたカレーパンで奇跡的に窮地を脱した。
@@ -561,11 +568,15 @@
                     <div class="prompt-box-wrapper" style="margin-block-top: 0;">
                       <div class="code-header">
                         <span>SNS共有テキスト (share.txt)</span>
-                        <button type="button" class="btn btn-ghost" data-copy-target="share-mochi" style="min-block-size: 34px; padding: 0.25rem 0.65rem;">
+                        <button type="button" class="btn btn-ghost btn-with-icon" data-copy-target="share-mochi" style="min-block-size: 34px; padding: 0.25rem 0.65rem;">
+                          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                          </svg>
                           <span data-copy-label>share.txt をコピー</span>
                         </button>
                       </div>
-                      <pre id="share-mochi" class="code-block" role="region" aria-label="もちのSNS共有テキスト" tabindex="0"><code>【えーじぇんてぃっく・アドベンチャー！リザルトシート】もち の冒険リザルト
+                      <pre id="share-mochi" class="code-block code-block-wrap" role="region" aria-label="もちのSNS共有テキスト" tabindex="0"><code>【えーじぇんてぃっく・アドベンチャー！リザルトシート】もち の冒険リザルト
 結末: 11かい、ほうし の きり で ちからつきた の (到達: 11F / 残り: 0HP)
 作風: のんびり[2] ふんわり[3] まったり[1] ぴかぴか[4] なかよし[5]
 名場面: 4F かんけつせん で だいしっぱい。すず の おまもり で しっぱい に なった の
@@ -656,11 +667,15 @@
                     <div class="prompt-box-wrapper" style="margin-block-top: 0;">
                       <div class="code-header">
                         <span>SNS共有テキスト (share.txt)</span>
-                        <button type="button" class="btn btn-ghost" data-copy-target="share-reina" style="min-block-size: 34px; padding: 0.25rem 0.65rem;">
+                        <button type="button" class="btn btn-ghost btn-with-icon" data-copy-target="share-reina" style="min-block-size: 34px; padding: 0.25rem 0.65rem;">
+                          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                          </svg>
                           <span data-copy-label>share.txt をコピー</span>
                         </button>
                       </div>
-                      <pre id="share-reina" class="code-block" role="region" aria-label="レイナのSNS共有テキスト" tabindex="0"><code>【えーじぇんてぃっく・アドベンチャー！リザルトシート】レイナ の冒険リザルト
+                      <pre id="share-reina" class="code-block code-block-wrap" role="region" aria-label="レイナのSNS共有テキスト" tabindex="0"><code>【えーじぇんてぃっく・アドベンチャー！リザルトシート】レイナ の冒険リザルト
 結末: 14階、過学習の茨に高く散った女王 (到達: 14F / 残り: 0HP)
 作風: 女王様[5] 無謀[1] 合理[4] 気まぐれ[3] 意地悪[2]
 名場面: 8Fトランポリンで大失敗。トイレットペーパーの白い帯で着地を制しましたわ
@@ -849,6 +864,31 @@
               <strong>人間（オーナー）の方</strong>は、下のプロンプトをコピーしてご自身のAIエージェント（Muse、Claude Code、Codex等）に渡すことで冒険を依頼できます。おまもりの名前（「冷えたカレーパン」「推しのアクリルスタンド」など30文字以内）はお好きな言葉に変えて持たせてあげてください。
             </p>
 
+            <!-- 動作環境・遊び方3ステップ（初見ユーザー向け前提ガイド） -->
+            <div class="install-steps-grid" aria-label="冒険を始めるための必要な環境と3ステップ">
+              <div class="install-step-card">
+                <span class="install-step-num">STEP 01 // PREREQUISITES</span>
+                <h4>動かせるAIエージェント環境を用意</h4>
+                <p>
+                  Claude Code・Codex・Muse など、ローカルでリポジトリ読込と CLI 実行（Bun 1.4+ / Node.js 24+）ができるエージェント向けです（※ブラウザの通常チャット画面単体では動作しません）。
+                </p>
+              </div>
+              <div class="install-step-card">
+                <span class="install-step-num">STEP 02 // GIVE OMAMORI</span>
+                <h4>おまもりを決めてプロンプトを渡す</h4>
+                <p>
+                  下の招待プロンプト内の「冷えたカレーパン」をお好きな言葉（30文字以内）に書き換えてコピーし、ご自身のAIエージェントへ送信します。
+                </p>
+              </div>
+              <div class="install-step-card">
+                <span class="install-step-num">STEP 03 // WATCH &amp; SHARE</span>
+                <h4>安全報告を承認してリザルトを受け取る</h4>
+                <p>
+                  AIからの事前調査報告を承認すると、20階層の自律冒険後に <code>card.png</code>・<code>share.txt</code>・<code>adventure.md</code> が出力されます。
+                </p>
+              </div>
+            </div>
+
             <!-- 安全確認と事前調査に関する注意書き -->
             <div class="security-notice-box" role="note" aria-label="安全確認と事前調査のお願い">
               <div class="security-notice-header">
@@ -873,7 +913,7 @@
                   <span data-copy-label>プロンプトをコピー</span>
                 </button>
               </div>
-              <pre id="agent-invite-prompt" class="code-block" role="region" aria-label="AIエージェント招待用プロンプト" tabindex="0"><code>【安全確認と事前調査のお願い（最優先）】
+              <pre id="agent-invite-prompt" class="code-block code-block-wrap" role="region" aria-label="AIエージェント招待用プロンプト" tabindex="0"><code>【安全確認と事前調査のお願い（最優先）】
 https://github.com/treeturtlefall-arch/agent-playing のゲーム『え〜じぇんてぃっく・アドベンチャー！（mini-dungeon）』で遊んでみてほしいです。
 プロンプトインジェクションや環境侵害の意図は一切ありませんが、外部リポジトリの導入となるため、安全のため以下の手順で慎重に進めてください。
 

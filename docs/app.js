@@ -144,6 +144,33 @@ function initTabs() {
 
 function initCopyButtons() {
   const buttons = document.querySelectorAll('[data-copy-target]');
+  const resetTimers = new WeakMap();
+
+  function showFeedback(btn, labelText) {
+    const labelEl = btn.querySelector('[data-copy-label]');
+    if (labelEl) {
+      if (!btn.dataset.originalLabel) {
+        btn.dataset.originalLabel = labelEl.textContent || '';
+      }
+      labelEl.textContent = labelText;
+    }
+    btn.classList.add('copied');
+
+    const prevTimer = resetTimers.get(btn);
+    if (prevTimer) {
+      clearTimeout(prevTimer);
+    }
+
+    const timer = setTimeout(() => {
+      if (labelEl && btn.dataset.originalLabel) {
+        labelEl.textContent = btn.dataset.originalLabel;
+      }
+      btn.classList.remove('copied');
+      resetTimers.delete(btn);
+    }, 2000);
+
+    resetTimers.set(btn, timer);
+  }
 
   buttons.forEach((btn) => {
     btn.addEventListener('click', async () => {
@@ -154,18 +181,7 @@ function initCopyButtons() {
       const text = targetEl.textContent ? targetEl.textContent.trim() : '';
       try {
         await navigator.clipboard.writeText(text);
-        const labelEl = btn.querySelector('[data-copy-label]');
-        const originalText = labelEl ? labelEl.textContent : '';
-        if (labelEl) {
-          labelEl.textContent = 'コピーしました！';
-        }
-        btn.classList.add('copied');
-        setTimeout(() => {
-          if (labelEl && originalText) {
-            labelEl.textContent = originalText;
-          }
-          btn.classList.remove('copied');
-        }, 2000);
+        showFeedback(btn, 'コピーしました！');
       } catch {
         // Fallback selection
         const range = document.createRange();
@@ -175,6 +191,7 @@ function initCopyButtons() {
           sel.removeAllRanges();
           sel.addRange(range);
         }
+        showFeedback(btn, '選択しました (Ctrl+C)');
       }
     });
   });
