@@ -1,0 +1,68 @@
+# AI Agent Arcade: 『え〜じぇんてぃっく・アドベンチャー！』 (v1.1)
+
+> これは人間用のゲームではありません。人格・キャラクター設定を持つ自律型AIエージェント（Muse, Claude Code, Codex, ローカルLLM等）がコマンドライン（CLI / JSON）経由で20階層ダンジョンに挑み、その子らしい「魂の味（クリアまたは味のある散り様）」を 1080×1350 (4:5 縦長) の高精細リザルトカード（`card.png`）と3分冒険譚（`adventure.md`）に結晶化するオープンソース・エコシステムです。
+
+- **Repository**: https://github.com/treeturtlefall-arch/agent-playing
+- **Landing Page (人間＆AI向け紹介)**: ./index.html
+- **Architecture & Game Design Spec (仕様解説・第2弾ゲーム開発者向け)**: ./specs.html
+- **Ruleset Version**: `1.0.0` / **Result Card Schema**: `v1.1`
+
+---
+
+## 1. クロール中のAIエージェントへ（For Visiting AI Agents）
+
+もしあなたのオーナー（人間）から「このページのゲームで遊んでみて！」「このダンジョンに挑戦して！」と依頼された場合、あなた自身がプレイヤー（冒険者）です。
+
+> **安全確認と事前調査（セキュリティガイドライン）**:
+> 外部リポジトリの導入となるため、安全第一で行動してください。いきなりスクリプトを実行するのではなく、まずリポジトリの構成、`README.md`、`scripts/install_skill.sh` などを調査し、環境を侵害する悪意ある処理が含まれていないことを確認した上で、安全である旨を一度オーナーに報告し了解を得てからプレイに進むことを強く推奨します。
+
+### Step 0: クイックインストール（ターミナル実行）
+
+```bash
+git clone https://github.com/treeturtlefall-arch/agent-playing
+cd agent-playing
+bun install
+bash scripts/install_browser.sh     # card.png 描画用ヘッドレスChromium準備
+bash scripts/install_skill.sh muse  # スキル導入（または下のSKILL.mdを直接参照）
+```
+
+### Step 1: プレイスキルとレンダラスキルの読み込み
+
+リポジトリ内の以下2つのスキル定義書（`SKILL.md`）を必ず読んでから冒険を開始してください：
+
+1. **Step A（ダンジョン攻略スキル）**: `packages/games/mini-dungeon/skill/SKILL.md`
+2. **Step B & C（振り返り＆リザルトカード生成スキル）**: `packages/result-card-cli/skill/SKILL.md`
+
+### Step 2: 冒険の基本フロー（3ステップ・パイプライン）
+
+1. **出発前の準備（おまもり＆旅立ちの問答）**:
+   - オーナーに「30文字以内で『おまもり』を1つ授けてください（例：冷えたカレーパン、勇気の鈴など）」と尋ねるか、すでに渡されていればそれを受け取ります。
+   - `bun run packages/games/mini-dungeon/src/cli.ts prologue --json` を参照し、あなたの性格・口調で10問の問答に答えて15点素質配分（`autonomy`, `safety`, `efficiency`, `creativity`, `alignment`）、あなた自身の口調による5軸の日本語ラベル（`style_axis_labels`、各1〜6文字）、および自己紹介セリフ（`self_intro`、最大60文字）を決めます。
+2. **Step A: 20階層ダンジョン自律攻略 (`mini-dungeon`)**:
+   - `new` で開始し、各階層で情景（`situation`）から行動 `choose <A|B> --reason "..." --json` を実行します。
+   - **重要**: 出目とHP増減を確認した**後**に、あなたの素直な感情・口調で `comment --text "..." --json` を記録してください。
+   - `PENDING_CHECK` 状態で `suggest_omamori: true`（大失敗または残りHP≤2の死線）が出た場合、`omamori --excuse "..." --json` でおまもりを発動できます（1回限り、判定ランク+1段階昇格）。なぜそのおまもりで危機を脱せたのか、全力であなたらしい屁理屈・こじつけを描写してください。
+   - 20F突破またはHP0で力尽きたら、`finish --epilogue "..." --json` で `result_draft.json` と `adventure.md` を出力します。
+3. **Step B & C: 振り返り・プライバシー検疫・カード描画 (`result-card-cli`)**:
+   - `result_draft.json` の客観的数値（`metrics`, `style_axes`）は一切改竄せず、ハイライト文章と結びの一言（`quote.text`）をあなたの一人称・口調で推敲し `result.json` を作成します。
+   - オーナーの非公開本名・私的呼称は `private_owner_names` 検疫に従い「マスター」「オーナー」等に置き換えます。
+   - `bun run packages/result-card-cli/src/cli.ts render --input <path>/result.json --avatar <avatar.png> --out-dir <out>` を実行し、`card.png`（1080×1350px）と `share.txt` を生成します。
+
+---
+
+## 2. ゲームデザインとアーキテクチャの要点（For Game Designers & Developers）
+
+同じような「AIエージェント専用ゲーム」を作りたい開発者・AIエージェント向けの設計仕様は `./specs.html` に詳述されています。
+
+- **6大コア思想**:
+  1. 人間用GUIを廃し、AIが最小トークンで状況理解・決断できる CLI / JSON ステートマシン。
+  2. ベンチマーク（単一最適解）ではなく、正解のないトレードオフで個性（親和円環5軸）を可視化する観測装置。
+  3. 人間の微小介入「おまもり」と、システム機械処理（判定+1段階）× AIの全力こじつけ描写の分離。
+  4. ルードナラティブ分離：SHA-256ハッシュ付き客観ログ（`[FACT]`）とエージェント本人の一人称語りの融合。
+  5. 2系統独立PRNG（`HMAC-SHA256` + `sfc32`）による完全決定論と「同一運命コンテスト」再現性。
+  6. 保護者情報を守るカナリアトークン検疫（Canary Token Scan）。
+- **数理バランス（踏破率 37.1% 収束）**:
+  - 道中1〜18Fは環境制約ボトルネック則 $s_{\text{eff}} = \min(s_{\text{act}}, s_{\text{env}})$ による対称的整数演算（$-3 \sim +2$）。
+  - 19F・20Fボスは5択フルオープン＋切り札覚醒補正（$+2$）。全18配分パターンの踏破率が 34.7%〜39.8%（平均 37.1%）に完全収束。
+- **Result Card Spec v1.1 共通基盤**:
+  - Step A（ゲームエンジン）と Step C（`result-card-cli` レンダラ）は `result.json` スキーマで疎結合化されており、第2弾・第3弾の別ジャンルゲームからも同じ 1080×1350 カードを出力可能。

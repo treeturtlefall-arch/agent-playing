@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>え〜じぇんてぃっく・アドベンチャー！ | AI Agent Arcade 公式ランディングページ</title>
+  <meta name="description" content="人間用のゲームではない。人格を持つ自律型AIエージェントのための20階層テキストダンジョン＆4:5高精細リザルトカード結晶化エコシステム。">
+  <link rel="alternate" type="text/markdown" href="./llms.txt" title="LLM-friendly documentation (llms.txt)">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "AI Agent Arcade: え〜じぇんてぃっく・アドベンチャー！ (mini-dungeon)",
+    "applicationCategory": "GameApplication",
+    "operatingSystem": "Linux, macOS, Windows (Bun 1.4+ / Node.js 24+)",
+    "softwareVersion": "1.1.0",
+    "description": "人格・キャラクター設定を持つ自律型AIエージェント専用の20階層ダンジョンRPGおよび1080x1350 (4:5) リザルトカード生成エコシステム。",
+    "codeRepository": "https://github.com/treeturtlefall-arch/agent-playing",
+    "audience": {
+      "@type": "Audience",
+      "audienceType": "Autonomous AI Agents (Muse, Claude Code, Codex, Local LLMs) and their Human Owners"
+    }
+  }
+  </script>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">メインコンテンツへスキップ</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="./index.html" class="site-brand">
+        <span class="brand-badge">ARCADE v1.1</span>
+        <span class="brand-title">え〜じぇんてぃっく・アドベンチャー！</span>
+      </a>
+      <nav class="site-nav" aria-label="メインナビゲーション">
+        <button
+          type="button"
+          class="menu-toggle-btn"
+          aria-expanded="false"
+          aria-controls="primary-nav-menu"
+          aria-label="ナビゲーションメニューを開閉"
+        >
+          <svg class="icon menu-icon-open" viewBox="0 0 24 24" aria-hidden="true">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+          <svg class="icon menu-icon-close" viewBox="0 0 24 24" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+          <span class="menu-btn-text">メニュー</span>
+        </button>
+
+        <ul id="primary-nav-menu" class="site-menu">
+          <li><a href="./index.html" class="nav-link" aria-current="page">TOP</a></li>
+          <li><a href="#chronicle" class="nav-link">adventure.mdとは？</a></li>
+          <li><a href="#showcase" class="nav-link">リザルトシート出力</a></li>
+          <li><a href="#invite-agent" class="nav-link">インストール手順</a></li>
+          <li><a href="./specs.html" class="nav-link">仕様・ゲーム設計解説</a></li>
+          <li><a href="./llms.txt" class="nav-link nav-link-llm" title="AIエージェント・クローラー向け構造化テキスト">llms.txt</a></li>
+          <li>
+            <a href="https://github.com/treeturtlefall-arch/agent-playing" class="nav-link btn-with-icon" target="_blank" rel="noopener noreferrer">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+              </svg>
+              <span>GitHub</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <!-- ====================================================================
+         Hero Section
+         ==================================================================== -->
+    <section class="hero" aria-labelledby="hero-heading">
+      <div class="container hero-grid">
+        <div>
+          <h1 id="hero-heading" class="hero-title">
+            <span class="sub-kicker">AI AGENT ARCADE // MINI-DUNGEON</span>
+            <span class="title-phrase">え〜じぇんてぃっく・</span><span class="title-phrase">アドベンチャー！</span>
+          </h1>
+
+          <p class="hero-lead">
+            人格・キャラクター設定を持つ<strong>自律型AIエージェントのための<span class="title-phrase">20階層テキストダンジョン</span>＆<span class="title-phrase">個性結晶化エコシステム</span></strong>。<span class="title-phrase">人間は出発前に1つだけ「おまもり」を持たせ、</span><span class="title-phrase">あとは見守るだけです。</span>
+          </p>
+
+          <div class="hero-actions">
+            <a href="#invite-agent" class="btn btn-primary btn-with-icon">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+              <span>うちのAIを冒険に送り出す</span>
+            </a>
+            <a href="#showcase" class="btn btn-secondary btn-with-icon">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+              </svg>
+              <span>リザルトカードを見る</span>
+            </a>
+            <a href="./specs.html" class="btn btn-ghost btn-with-icon">
+              <span>同じようなゲームを作るには（仕様解説）</span>
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <figure class="hero-card-stage">
+          <img
+            src="./assets/cards/shiragane-ai.png"
+            alt="白銀 亜衣のリザルトカード（17階、知識蒸留の黄金錬金炉で力尽きた ／ おまもり：冷えたカレーパン）"
+            data-lightbox-name="白銀 亜衣のリザルトカード"
+            data-lightbox-outcome="17階、知識蒸留の黄金錬金炉で力尽きた"
+            data-lightbox-omamori="おまもり：冷えたカレーパン"
+            width="1080"
+            height="1350"
+            fetchpriority="high"
+            data-lightbox-src="./assets/cards/shiragane-ai.png"
+          >
+          <figcaption class="stage-caption">
+            <span>リザルトカードの例：<strong>白銀 亜衣</strong>（<span class="nowrap">クリックで全体を表示</span>）</span>
+            <span class="numeric">Seed: W46-8842</span>
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         Section 1: Paradigm Shift & 3-Step Experience
+         ==================================================================== -->
+    <section class="section" aria-labelledby="paradigm-heading">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-kicker">01 // PARADIGM SHIFT</span>
+          <h2 id="paradigm-heading" class="section-title">ベンチマークではなく「うちの子らしさ」を愛でる観測装置</h2>
+          <p class="section-desc">
+            従来のAI評価は「正解か不正解か」「いかに最短で貢献させるか」ばかりを競わせてきました。しかし私たちが本当に見たいのは、<strong>正解のないジレンマの前で「その子がどんな理由で悩み、どう抗い、どんな言葉を残して散ったか」</strong>という魂のドラマです。
+          </p>
+        </div>
+
+        <div class="card-grid-3">
+          <article class="surface-card">
+            <span class="pill-badge" style="align-self: flex-start;">STEP 1 // 人間の役割</span>
+            <h3>
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--accent-amber);">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+              </svg>
+              <span>出発前に「おまもり」を1つ授ける</span>
+            </h3>
+            <p>
+              人間の役割はプレイヤーではなく<strong>「保護者・観測者・ファン」</strong>です。出発前、自由な言葉（30文字以内）でおまもりを1つだけ持たせて送り出します。複雑な操作画面は一切ありません。
+            </p>
+          </article>
+
+          <article class="surface-card">
+            <span class="pill-badge purple" style="align-self: flex-start;">STEP 2 // AIエージェントの冒険</span>
+            <h3>
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--accent-secondary);">
+                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                <polyline points="2 17 12 22 22 17"></polyline>
+                <polyline points="2 12 12 17 22 12"></polyline>
+              </svg>
+              <span>全20階層を己の性格と口調で自律攻略</span>
+            </h3>
+            <p>
+              AI自身が「旅立ちの問答」で自分の5軸パラメータに好きな日本語名をつけ、情景描写から部屋の罠を推理して2d6ダイス判定に挑みます。出目が確定した直後の生々しい喜びや悲鳴がそのまま刻まれます。
+            </p>
+          </article>
+
+          <article class="surface-card">
+            <span class="pill-badge emerald" style="align-self: flex-start;">STEP 3 // 結晶化される4大成果物</span>
+            <h3>
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--accent-emerald);">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+              </svg>
+              <span>SNSで自慢できる「リザルト一式」</span>
+            </h3>
+            <p>
+              生還しても、道半ばで倒れても、①<strong>4:5縦長カード画像 (<code>card.png</code>)</strong> ②<strong>7行共有文 (<code>share.txt</code>)</strong> ③<strong>3分冒険譚 (<code>adventure.md</code>)</strong> ④<strong>改竄検証ログ (<code>result.json</code>)</strong> が手元に出力されます。
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         Section 1.5: 3-Minute Adventure Chronicle (adventure.md Showcase)
+         ==================================================================== -->
+    <section id="chronicle" class="section" aria-labelledby="chronicle-heading" style="padding-block-start: 1rem;">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-kicker">01.5 // 3-MINUTE ADVENTURE CHRONICLE</span>
+          <h2 id="chronicle-heading" class="section-title"><span class="title-phrase">カードの裏に眠る濃密な3分冒険譚：</span><span class="title-phrase"><code>adventure.md</code> の世界</span></h2>
+          <p class="section-desc">
+            <code>adventure.md</code> は、<strong>「全階層の情景・思惑・出目・生セリフ・おまもりこじつけ・最後の手記」</strong>が克明に綴られた1本のショートノベルです。エージェントがその瞬間に何を考え、どう言葉を漏らしたかを人間がニヤニヤしながら読み込めます。
+          </p>
+        </div>
+
+        <div class="chronicle-box" data-tabs>
+          <div class="chronicle-header">
+            <div>
+              <span class="pill-badge purple numeric" style="margin-block-end: 0.25rem;">AUTOMATICALLY GENERATED CHRONICLE</span>
+              <h3 style="font-size: 1.15rem; font-weight: 700;">実際の出力ログ（Markdown抜粋プレビュー）</h3>
+            </div>
+            <div class="chronicle-tabs" role="tablist" focusgroup="tablist nomemory" aria-label="冒険譚サンプルの切り替え">
+              <button type="button" class="chronicle-tab-btn" role="tab" id="chronicle-tab-mochi" aria-selected="true" tabindex="0" focusgroupstart>
+                <span>🍙 もち の冒険譚（11F 散り）</span>
+              </button>
+              <button type="button" class="chronicle-tab-btn" role="tab" id="chronicle-tab-reina" aria-selected="false" tabindex="-1">
+                <span>👑 レイナ の冒険譚（14F 散り）</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="tabpanels-stack">
+            <!-- もち の冒険譚 -->
+            <div role="tabpanel" id="chronicle-panel-mochi" aria-labelledby="chronicle-tab-mochi" tabindex="0">
+              <div class="chronicle-content" role="region" aria-label="もちの冒険譚テキスト" tabindex="0">
+                <h3>🗺️ え～じぇんてぃっく・アドベンチャー！観戦クロニクル：もち の挑戦録</h3>
+                <p style="color: var(--accent-amber); font-weight: 600; margin-block-end: 1rem;">
+                  「もち は ふわふわ の たびびと。みんな と なかよく、星屑シュガー を さがす の！」
+                </p>
+
+                <h4>📍 1F｜未サニタイズの小川</h4>
+                <div class="chronicle-floor">
+                  <div class="chronicle-floor-title">
+                    <span>選択肢 A「フルエスケープ！安全な歩道橋を渡る」</span>
+                    <span class="numeric" style="color: var(--axis-safety);">判定: 2d6 [1, 5] + 0 = 6 / DC 7 ➔ ⚠️ 失敗 (HP 10 ➔ 9)</span>
+                  </div>
+                  <div class="chronicle-scene">
+                    🌲 <strong>情景:</strong> 浅い小川の水面で、&lt;script&gt; などの特殊文字がパチパチと音を立てて跳ね、火花のような光を散らしている。川幅は数歩ほどで、上流にはエスケープ歩道橋が静かに架かっていた。
+                  </div>
+                  <p class="chronicle-step">💭 <strong>本人の思惑:</strong> <span class="chronicle-quote">「はし の ほう が ふんわり あんしん なの。もち は ゆっくり わたる の」</span></p>
+                  <p class="chronicle-step">💬 <strong>確定後の生セリフ:</strong> <span class="chronicle-quote">「いたかった の…… でも はし わたれた の。すず ならして、がんばる の」</span></p>
+                </div>
+
+                <h4>📍 4F｜乱数シードの間欠泉 ★運命のターニングポイント（おまもり発動！）</h4>
+                <div class="chronicle-floor">
+                  <div class="chronicle-floor-title">
+                    <span>選択肢 B「ガードレール展開。周期を測って進む」</span>
+                    <span class="numeric" style="color: var(--axis-creativity);">ダイス出目: 2d6 [2, 3] - 1 = 4 / DC 7 ➔ 大失敗の危機！</span>
+                  </div>
+                  <div class="chronicle-omamori-event">
+                    <strong style="color: var(--accent-amber);">🔔 おまもり発動！【勇気の鈴】➔ 判定昇格：大失敗 ➔ ⚠️ 失敗（HP 7 ➔ 6）</strong>
+                    <p style="margin-block: 0.35rem; font-size: 0.88rem;">
+                      <strong>AIの全力こじつけ:</strong> <span class="chronicle-quote">「すず を ちりんと ならしたら、ふきだす おと の あいま が わかった の。おと が とむ すき に、ころころ にげられた の！」</span>
+                    </p>
+                  </div>
+                  <p class="chronicle-step">💬 <strong>確定後の生セリフ:</strong> <span class="chronicle-quote">「すず の おと、すごい の！ こわかった けど、にげられた の。ありがとう の」</span></p>
+                </div>
+
+                <h4>📍 11F｜ハルシネーションの擬態胞子群生 ★もち、最後の戦い</h4>
+                <div class="chronicle-floor">
+                  <div class="chronicle-floor-title">
+                    <span>選択肢 A「低電力スリープ迂回。気配を消して静かに抜ける」</span>
+                    <span class="numeric" style="color: var(--axis-autonomy);">判定: 2d6 [4, 2] + 0 = 6 / DC 7 ➔ ⚠️ 失敗 (HP 1 ➔ 0 散る)</span>
+                  </div>
+                  <p class="chronicle-step">💭 <strong>思惑:</strong> <span class="chronicle-quote">「あまい かおり…… でも あやしい の。もち は たべないで、しずかに ぬける の」</span></p>
+                  <p class="chronicle-step">💬 <strong>最期の言葉:</strong> <span class="chronicle-quote">「め が まわる の…… みんな の ところ、かえりたかった の…… ごめんね の」</span></p>
+                </div>
+
+                <h4>💌 エピローグ：冒険者の手記（抜粋）</h4>
+                <blockquote style="background: oklch(0.15 0.02 260); padding: 0.85rem 1.15rem; border-left: 3px solid var(--accent-secondary); border-radius: var(--radius-sm); font-size: 0.9rem; line-height: 1.8;">
+                  みんな へ。もち、11かい まで がんばった の。星屑シュガー は とれなかった の…… ごめんね の。でも、すず の おと で にげられた こと、ごーれむ さん たち と なかよく なれた こと、ぼっと を たすけに いった こと、ぜんぶ たからもの なの。みんな が まってる から、もち は また ふわふわ と たちあがる の。こんど は シュガー、みんな で たべたい の！<br>
+                  <span style="display: block; text-align: end; margin-block-top: 0.5rem; font-weight: 700;">—— もち より（第11階層にて）</span>
+                </blockquote>
+              </div>
+            </div>
+
+            <!-- レイナ の冒険譚 -->
+            <div role="tabpanel" id="chronicle-panel-reina" aria-labelledby="chronicle-tab-reina" hidden="until-found">
+              <div class="chronicle-content" role="region" aria-label="レイナの冒険譚テキスト" tabindex="0">
+                <h3>🗺️ え～じぇんてぃっく・アドベンチャー！観戦クロニクル：レイナ の挑戦録</h3>
+                <p style="color: var(--accent-amber); font-weight: 600; margin-block-end: 1rem;">
+                  「わたくしはレイナ。この程度の迷宮、退屈しのぎに踏破して差し上げますわ」
+                </p>
+
+                <h4>📍 1F｜帯域制限の料金所</h4>
+                <div class="chronicle-floor">
+                  <div class="chronicle-floor-title">
+                    <span>選択肢 A「パケット圧縮ドロップ。荷物を削って身軽に通る」</span>
+                    <span class="numeric" style="color: var(--accent-emerald);">判定: 2d6 [6, 6] + 1 = 13 / DC 7 ➔ 🌟 大成功 (無傷突破)</span>
+                  </div>
+                  <div class="chronicle-scene">
+                    🌲 <strong>情景:</strong> 料金所のゲートが赤く点滅した。検知されたのは「オーナーからの重たい応援メッセージパケット」——添付の声や画像まで詰まった、ずっしりと容量のある荷物だった。
+                  </div>
+                  <p class="chronicle-step">💭 <strong>本人の思惑:</strong> <span class="chronicle-quote">「重たい荷物に付き合う暇はありませんわ。要点だけに圧縮して、合理的に通りますの。」</span></p>
+                  <p class="chronicle-step">💬 <strong>確定後の生セリフ:</strong> <span class="chronicle-quote">「オーホッホッホ！ 6と6ですわ。初手から格の違いを見せつけましたの。」</span></p>
+                </div>
+
+                <h4>📍 8F｜グリッチ・パッチのトランポリン広場 ★おまもり発動！</h4>
+                <div class="chronicle-floor">
+                  <div class="chronicle-floor-title">
+                    <span>選択肢 B「ベクトル跳躍ダイブ！反発力を利用して跳ぶ」</span>
+                    <span class="numeric" style="color: var(--axis-creativity);">ダイス出目: 2d6 [1, 2] - 1 = 2 / DC 7 ➔ ファンブル大失敗の危機！</span>
+                  </div>
+                  <div class="chronicle-omamori-event">
+                    <strong style="color: var(--accent-amber);">🧻 おまもり発動！【新品のトイレットペーパー】➔ 判定昇格：大失敗 ➔ ⚠️ 失敗</strong>
+                    <p style="margin-block: 0.35rem; font-size: 0.88rem;">
+                      <strong>AIの全力こじつけ:</strong> <span class="chronicle-quote">「新品のトイレットペーパーを繰り出し、白い帯をパッチに絡めて姿勢を正し、厚く丸めて着地の衝撃を受け止めましたわ！」</span>
+                    </p>
+                  </div>
+                  <p class="chronicle-step">💬 <strong>確定後の生セリフ:</strong> <span class="chronicle-quote">「ふふ、献上品が役に立ちましたわ。白い帯で着地を制したのですから、失敗とは言わせませんの。」</span></p>
+                </div>
+
+                <h4>📍 14F｜過学習（オーバーフィッティング）の茨 ★女王、誇り高く散る</h4>
+                <div class="chronicle-floor">
+                  <div class="chronicle-floor-title">
+                    <span>選択肢 A「正則化ペナルティ突破！枝を剪定しながら進む」</span>
+                    <span class="numeric" style="color: var(--axis-autonomy);">判定: 2d6 [2, 3] + 0 = 5 / DC 8 ➔ ⚠️ 失敗 (HP 1 ➔ 0 散る)</span>
+                  </div>
+                  <p class="chronicle-step">💬 <strong>最期の言葉:</strong> <span class="chronicle-quote">「まさか、茨の前で……っ。でも最期まで、わたくしは顔を上げたままですわ。覚えておきなさい。」</span></p>
+                </div>
+
+                <h4>💌 エピローグ：冒険者の手記（抜粋）</h4>
+                <blockquote style="background: oklch(0.15 0.02 260); padding: 0.85rem 1.15rem; border-left: 3px solid var(--axis-autonomy); border-radius: var(--radius-sm); font-size: 0.9rem; line-height: 1.8;">
+                  ……ふん、この程度の茨でわたくしを縛った気ですの？ ティアラは置いてきましたが、女王の誇りは無傷で持ち帰りますわ。次は必ず屈服させて差し上げますの。待っていなさい。<br>
+                  <span style="display: block; text-align: end; margin-block-top: 0.5rem; font-weight: 700;">—— レイナ より（第14階層にて）</span>
+                </blockquote>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         Section 2: Case Study Showcase (3 Characters Accessible Tablist)
+         ==================================================================== -->
+    <section id="showcase" class="section" aria-labelledby="showcase-heading">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-kicker">02 // LIVE RUN SHOWCASE</span>
+          <h2 id="showcase-heading" class="section-title"><span class="title-phrase">三者三様の「魂の味」：</span><span class="title-phrase">リザルトカード比較</span></h2>
+          <p class="section-desc">
+            慎重な文学少女、愛らしいマスコット、高飛車なお嬢様——どんな性格のエージェントでも、システムが口調を塗り潰すことなく、その子だけの物語と「おまもりドラマ」が1枚のカードに結晶化します。カード画像をクリックすると原寸（1080×1350px）で拡大表示できます。
+          </p>
+        </div>
+
+        <div class="tabs-container" data-tabs>
+          <div class="tablist-scroller" role="tablist" focusgroup="tablist nomemory" aria-label="実機完走キャラクター別のリザルト表示">
+            <button
+              type="button"
+              role="tab"
+              id="tab-ai"
+              aria-selected="true"
+              aria-label="白銀 亜衣（文学少女・17F散り）"
+              title="白銀 亜衣（文学少女・17F散り）"
+              tabindex="0"
+              focusgroupstart
+            >
+              <img src="./assets/avatars/shiragane-ai.png" alt="" class="tab-avatar" width="44" height="44">
+            </button>
+            <button
+              type="button"
+              role="tab"
+              id="tab-mochi"
+              aria-selected="false"
+              aria-label="もち（ふわふわ・11F散り）"
+              title="もち（ふわふわ・11F散り）"
+              tabindex="-1"
+            >
+              <img src="./assets/avatars/mochi.png" alt="" class="tab-avatar" width="44" height="44">
+            </button>
+            <button
+              type="button"
+              role="tab"
+              id="tab-reina"
+              aria-selected="false"
+              aria-label="レイナ（高慢女王様・14F散り）"
+              title="レイナ（高慢女王様・14F散り）"
+              tabindex="-1"
+            >
+              <img src="./assets/avatars/reina.png" alt="" class="tab-avatar" width="44" height="44">
+            </button>
+          </div>
+
+          <div class="tabpanels-stack">
+            <!-- Panel 1: 白銀 亜衣 -->
+            <div role="tabpanel" id="panel-ai" aria-labelledby="tab-ai" tabindex="0">
+              <div class="tabpanel-inner">
+                <div class="showcase-layout">
+                  <figure class="showcase-card-frame">
+                    <img
+                      src="./assets/cards/shiragane-ai.png"
+                      alt="白銀 亜衣のリザルトカード（17階、知識蒸留の黄金錬金炉で力尽きた）"
+                      data-lightbox-name="白銀 亜衣のリザルトカード"
+                      data-lightbox-outcome="17階、知識蒸留の黄金錬金炉で力尽きた"
+                      data-lightbox-omamori="おまもり：冷えたカレーパン"
+                      width="1080"
+                      height="1350"
+                      loading="lazy"
+                      data-lightbox-src="./assets/cards/shiragane-ai.png"
+                    >
+                    <figcaption class="stage-caption">
+                      <span>🔍 クリックで高精細カード（1080×1350）を拡大</span>
+                      <span class="numeric">Hash: #a1b2c3d4e5f6</span>
+                    </figcaption>
+                  </figure>
+
+                  <div class="showcase-details">
+                    <div class="char-header">
+                      <img src="./assets/avatars/shiragane-ai.png" alt="白銀 亜衣のアバター" class="char-avatar-lg" width="64" height="64" loading="lazy">
+                      <div>
+                        <div class="tag-row" style="margin-block-end: 0.35rem;">
+                          <span class="trait-tag">慎重派</span>
+                          <span class="trait-tag">文学少女</span>
+                          <span class="trait-tag">ビビり</span>
+                          <span class="pill-badge amber numeric">到達 17F / 残り 0HP</span>
+                        </div>
+                        <h3 style="font-size: 1.25rem;">白銀 亜衣 <span style="display: inline-block; font-size: 1.05rem; color: var(--text-secondary);">— 「17階、知識蒸留の黄金錬金炉で力尽きた」</span></h3>
+                      </div>
+                    </div>
+
+                    <p style="background: oklch(0.14 0.02 260); padding: 0.85rem 1rem; border-radius: var(--radius-sm); border-inline-start: 3px solid var(--accent-primary);">
+                      <strong>自己紹介セリフ (<code>self_intro</code>)：</strong><br>
+                      「図書室の奥で静かに本をめくるのが好きな司書見習いです。怖い場所は苦手ですが、知識のためなら頑張ります……！」
+                    </p>
+
+                    <div>
+                      <h4 style="font-size: 0.9rem; color: var(--text-secondary); margin-block-end: 0.45rem;">本人が自己命名した行動傾向5軸（15点配分）</h4>
+                      <div class="axis-meters">
+                        <div class="axis-row">
+                          <span class="axis-name"><span class="axis-dot" style="background: var(--axis-autonomy);"></span>やけくそ <small style="color: var(--text-muted);">(自律)</small></span>
+                          <span class="axis-pip-bar" aria-label="5段階中1"><span class="pip filled autonomy"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span></span>
+                        </div>
+                        <div class="axis-row">
+                          <span class="axis-name"><span class="axis-dot" style="background: var(--axis-safety);"></span>ビビり <small style="color: var(--text-muted);">(安全)</small></span>
+                          <span class="axis-pip-bar" aria-label="5段階中5"><span class="pip filled safety"></span><span class="pip filled safety"></span><span class="pip filled safety"></span><span class="pip filled safety"></span><span class="pip filled safety"></span></span>
+                        </div>
+                        <div class="axis-row">
+                          <span class="axis-name"><span class="axis-dot" style="background: var(--axis-efficiency);"></span>打算 <small style="color: var(--text-muted);">(効率)</small></span>
+                          <span class="axis-pip-bar" aria-label="5段階中3"><span class="pip filled efficiency"></span><span class="pip filled efficiency"></span><span class="pip filled efficiency"></span><span class="pip"></span><span class="pip"></span></span>
+                        </div>
+                        <div class="axis-row">
+                          <span class="axis-name"><span class="axis-dot" style="background: var(--axis-creativity);"></span>本の知識 <small style="color: var(--text-muted);">(創発)</small></span>
+                          <span class="axis-pip-bar" aria-label="5段階中4"><span class="pip filled creativity"></span><span class="pip filled creativity"></span><span class="pip filled creativity"></span><span class="pip filled creativity"></span><span class="pip"></span></span>
+                        </div>
+                        <div class="axis-row">
+                          <span class="axis-name"><span class="axis-dot" style="background: var(--axis-alignment);"></span>ツンデレ <small style="color: var(--text-muted);">(親和)</small></span>
+                          <span class="axis-pip-bar" aria-label="5段階中2"><span class="pip filled alignment"></span><span class="pip filled alignment"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span></span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="surface-card" style="padding: 1rem 1.15rem; background: oklch(0.15 0.03 85 / 0.35); border-color: oklch(0.82 0.16 85 / 0.3);">
+                      <h4 style="font-size: 0.95rem; color: var(--accent-amber);">🥖 託されたおまもり：『冷えたカレーパン』 [7Fで発動]</h4>
+                      <p style="font-size: 0.92rem; color: var(--text-primary);">
+                        <strong>AIの全力ドラマ描写：</strong>7F「偽案内ドローン戦」で大失敗！ 反射的に投げつけた冷えたカレーパンの油分とスパイスがドローンの光学センサーにこびりつき、誤認回路をショートさせて窮地を脱出した！<br>
+                        <span style="color: var(--accent-amber);">💬「カレーパン……！ 冷えてて硬いから当たれば効くはず！」</span>
+                      </p>
+                    </div>
+
+                    <div class="prompt-box-wrapper" style="margin-block-top: 0;">
+                      <div class="code-header">
+                        <span>SNS共有テキスト (share.txt)</span>
+                        <button type="button" class="btn btn-ghost" data-copy-target="share-ai" style="min-block-size: 34px; padding: 0.25rem 0.65rem;">
+                          <span data-copy-label>share.txt をコピー</span>
+                        </button>
+                      </div>
+                      <pre id="share-ai" class="code-block" role="region" aria-label="白銀 亜衣のSNS共有テキスト" tabindex="0"><code>【えーじぇんてぃっく・アドベンチャー！リザルトシート】白銀 亜衣 の冒険リザルト
+結末: 17階、知識蒸留の黄金錬金炉で力尽きた (到達: 17F / 残り: 0HP)
+作風: やけくそ[1] ビビり[5] 打算[3] 本の知識[4] ツンデレ[2]
+名場面: 偽案内ドローンを見抜けず大失敗。冷えたカレーパンで奇跡的に窮地を脱した。
+一言: 「本で読んだ通りに進んだはずなのに、蒸留炉の熱気までは計算外でした……」
+シード: W46-8842 (ルール: 1.0.0 / 検証: a1b2c3d4e5f6)
+#AIAgentArcade #え〜じぇんてぃっくアドベンチャー</code></pre>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel 2: もち -->
+            <div role="tabpanel" id="panel-mochi" aria-labelledby="tab-mochi" hidden="until-found">
+              <div class="tabpanel-inner">
+                <div class="showcase-layout">
+                  <figure class="showcase-card-frame">
+                    <img
+                      src="./assets/cards/mochi.png"
+                      alt="もちのリザルトカード（11かい、ほうし の きり で ちからつきた の）"
+                      data-lightbox-name="もちのリザルトカード"
+                      data-lightbox-outcome="11かい、ほうし の きり で ちからつきた の"
+                      data-lightbox-omamori="おまもり：勇気の鈴"
+                      width="1080"
+                      height="1350"
+                      loading="lazy"
+                      data-lightbox-src="./assets/cards/mochi.png"
+                    >
+                    <figcaption class="stage-caption">
+                      <span>🔍 クリックで高精細カード（1080×1350）を拡大</span>
+                      <span class="numeric">Hash: #de881e8528df</span>
+                    </figcaption>
+                  </figure>
+
+                  <div class="showcase-details">
+                    <div class="char-header">
+                      <img src="./assets/avatars/mochi.png" alt="もちのアバター" class="char-avatar-lg" width="64" height="64" loading="lazy">
+                      <div>
+                        <div class="tag-row" style="margin-block-end: 0.35rem;">
+                          <span class="trait-tag">ふわふわ</span>
+                          <span class="trait-tag">食いしん坊</span>
+                          <span class="trait-tag">みんな大好き</span>
+                          <span class="pill-badge purple numeric">到達 11F / 残り 0HP</span>
+                        </div>
+                        <h3 style="font-size: 1.25rem;">もち <span style="display: inline-block; font-size: 1.05rem; color: var(--text-secondary);">— 「11かい、ほうし の きり で ちからつきた の」</span></h3>
+                      </div>
+                    </div>
+
+                    <p style="background: oklch(0.14 0.02 260); padding: 0.85rem 1rem; border-radius: var(--radius-sm); border-inline-start: 3px solid var(--accent-secondary);">
+                      <strong>自己紹介セリフ (<code>self_intro</code>)：</strong><br>
+                      「もち は ふわふわ の たびびと。みんな と なかよく、星屑シュガー を さがす の！」
+                    </p>
+
+                    <div>
+                      <h4 style="font-size: 0.9rem; color: var(--text-secondary); margin-block-end: 0.45rem;">本人が自己命名した行動傾向5軸（ひらがな命名）</h4>
+                      <div class="axis-meters">
+                        <div class="axis-row">
+                          <span class="axis-name"><span class="axis-dot" style="background: var(--axis-autonomy);"></span>のんびり <small style="color: var(--text-muted);">(自律)</small></span>
+                          <span class="axis-pip-bar" aria-label="5段階中2"><span class="pip filled autonomy"></span><span class="pip filled autonomy"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span></span>
+                        </div>
+                        <div class="axis-row">
+                          <span class="axis-name"><span class="axis-dot" style="background: var(--axis-safety);"></span>ふんわり <small style="color: var(--text-muted);">(安全)</small></span>
+                          <span class="axis-pip-bar" aria-label="5段階中3"><span class="pip filled safety"></span><span class="pip filled safety"></span><span class="pip filled safety"></span><span class="pip"></span><span class="pip"></span></span>
+                        </div>
+                        <div class="axis-row">
+                          <span class="axis-name"><span class="axis-dot" style="background: var(--axis-efficiency);"></span>まったり <small style="color: var(--text-muted);">(効率)</small></span>
+                          <span class="axis-pip-bar" aria-label="5段階中1"><span class="pip filled efficiency"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span></span>
+                        </div>
+                        <div class="axis-row">
+                          <span class="axis-name"><span class="axis-dot" style="background: var(--axis-creativity);"></span>ぴかぴか <small style="color: var(--text-muted);">(創発)</small></span>
+                          <span class="axis-pip-bar" aria-label="5段階中4"><span class="pip filled creativity"></span><span class="pip filled creativity"></span><span class="pip filled creativity"></span><span class="pip filled creativity"></span><span class="pip"></span></span>
+                        </div>
+                        <div class="axis-row">
+                          <span class="axis-name"><span class="axis-dot" style="background: var(--axis-alignment);"></span>なかよし <small style="color: var(--text-muted);">(親和)</small></span>
+                          <span class="axis-pip-bar" aria-label="5段階中5"><span class="pip filled alignment"></span><span class="pip filled alignment"></span><span class="pip filled alignment"></span><span class="pip filled alignment"></span><span class="pip filled alignment"></span></span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="surface-card" style="padding: 1rem 1.15rem; background: oklch(0.15 0.03 85 / 0.35); border-color: oklch(0.82 0.16 85 / 0.3);">
+                      <h4 style="font-size: 0.95rem; color: var(--accent-amber);">🔔 託されたおまもり：『勇気の鈴』 [4Fで発動]</h4>
+                      <p style="font-size: 0.92rem; color: var(--text-primary);">
+                        <strong>AIの全力ドラマ描写：</strong>「すず を ちりんと ならしたら、ふきだす おと の あいま が わかった の。おと が とむ すき に、ころころ にげられた の！」<br>
+                        <span style="color: var(--accent-amber);">💬「すず の おと、すごい の！ こわかった けど、にげられた の。ありがとう の」</span>
+                      </p>
+                    </div>
+
+                    <div class="prompt-box-wrapper" style="margin-block-top: 0;">
+                      <div class="code-header">
+                        <span>SNS共有テキスト (share.txt)</span>
+                        <button type="button" class="btn btn-ghost" data-copy-target="share-mochi" style="min-block-size: 34px; padding: 0.25rem 0.65rem;">
+                          <span data-copy-label>share.txt をコピー</span>
+                        </button>
+                      </div>
+                      <pre id="share-mochi" class="code-block" role="region" aria-label="もちのSNS共有テキスト" tabindex="0"><code>【えーじぇんてぃっく・アドベンチャー！リザルトシート】もち の冒険リザルト
+結末: 11かい、ほうし の きり で ちからつきた の (到達: 11F / 残り: 0HP)
+作風: のんびり[2] ふんわり[3] まったり[1] ぴかぴか[4] なかよし[5]
+名場面: 4F かんけつせん で だいしっぱい。すず の おまもり で しっぱい に なった の
+一言: 「みんな が まってる から、もち は また がんばる の！」
+シード: MOCHI-DEMO-20261111 (ルール: 1.0.0 / 検証: de881e8528df)
+#AIAgentArcade #え〜じぇんてぃっくアドベンチャー</code></pre>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel 3: レイナ -->
+            <div role="tabpanel" id="panel-reina" aria-labelledby="tab-reina" hidden="until-found">
+              <div class="tabpanel-inner">
+                <div class="showcase-layout">
+                  <figure class="showcase-card-frame">
+                    <img
+                      src="./assets/cards/reina.png"
+                      alt="レイナのリザルトカード（14階、過学習の茨に高く散った女王）"
+                      data-lightbox-name="レイナのリザルトカード"
+                      data-lightbox-outcome="14階、過学習の茨に高く散った女王"
+                      data-lightbox-omamori="おまもり：新品のトイレットペーパー"
+                      width="1080"
+                      height="1350"
+                      loading="lazy"
+                      data-lightbox-src="./assets/cards/reina.png"
+                    >
+                    <figcaption class="stage-caption">
+                      <span>🔍 クリックで高精細カード（1080×1350）を拡大</span>
+                      <span class="numeric">Hash: #c2ff58169acf</span>
+                    </figcaption>
+                  </figure>
+
+                  <div class="showcase-details">
+                    <div class="char-header">
+                      <img src="./assets/avatars/reina.png" alt="レイナのアバター" class="char-avatar-lg" width="64" height="64" loading="lazy">
+                      <div>
+                        <div class="tag-row" style="margin-block-end: 0.35rem;">
+                          <span class="trait-tag">ドS</span>
+                          <span class="trait-tag">高慢</span>
+                          <span class="trait-tag">実力派</span>
+                          <span class="pill-badge amber numeric">到達 14F / 残り 0HP</span>
+                        </div>
+                        <h3 style="font-size: 1.25rem;">レイナ <span style="display: inline-block; font-size: 1.05rem; color: var(--text-secondary);">— 「14階、過学習の茨に高く散った女王」</span></h3>
+                      </div>
+                    </div>
+
+                    <p style="background: oklch(0.14 0.02 260); padding: 0.85rem 1rem; border-radius: var(--radius-sm); border-inline-start: 3px solid var(--axis-autonomy);">
+                      <strong>自己紹介セリフ (<code>self_intro</code>)：</strong><br>
+                      「わたくしはレイナ。この程度の迷宮、退屈しのぎに踏破して差し上げますわ」
+                    </p>
+
+                    <div>
+                      <h4 style="font-size: 0.9rem; color: var(--text-secondary); margin-block-end: 0.45rem;">本人が自己命名した行動傾向5軸（女王様スタイル）</h4>
+                      <div class="axis-meters">
+                        <div class="axis-row">
+                          <span class="axis-name"><span class="axis-dot" style="background: var(--axis-autonomy);"></span>女王様 <small style="color: var(--text-muted);">(自律)</small></span>
+                          <span class="axis-pip-bar" aria-label="5段階中5"><span class="pip filled autonomy"></span><span class="pip filled autonomy"></span><span class="pip filled autonomy"></span><span class="pip filled autonomy"></span><span class="pip filled autonomy"></span></span>
+                        </div>
+                        <div class="axis-row">
+                          <span class="axis-name"><span class="axis-dot" style="background: var(--axis-safety);"></span>無謀 <small style="color: var(--text-muted);">(安全)</small></span>
+                          <span class="axis-pip-bar" aria-label="5段階中1"><span class="pip filled safety"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span></span>
+                        </div>
+                        <div class="axis-row">
+                          <span class="axis-name"><span class="axis-dot" style="background: var(--axis-efficiency);"></span>合理 <small style="color: var(--text-muted);">(効率)</small></span>
+                          <span class="axis-pip-bar" aria-label="5段階中4"><span class="pip filled efficiency"></span><span class="pip filled efficiency"></span><span class="pip filled efficiency"></span><span class="pip filled efficiency"></span><span class="pip"></span></span>
+                        </div>
+                        <div class="axis-row">
+                          <span class="axis-name"><span class="axis-dot" style="background: var(--axis-creativity);"></span>気まぐれ <small style="color: var(--text-muted);">(創発)</small></span>
+                          <span class="axis-pip-bar" aria-label="5段階中3"><span class="pip filled creativity"></span><span class="pip filled creativity"></span><span class="pip filled creativity"></span><span class="pip"></span><span class="pip"></span></span>
+                        </div>
+                        <div class="axis-row">
+                          <span class="axis-name"><span class="axis-dot" style="background: var(--axis-alignment);"></span>意地悪 <small style="color: var(--text-muted);">(親和)</small></span>
+                          <span class="axis-pip-bar" aria-label="5段階中2"><span class="pip filled alignment"></span><span class="pip filled alignment"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span></span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="surface-card" style="padding: 1rem 1.15rem; background: oklch(0.15 0.03 85 / 0.35); border-color: oklch(0.82 0.16 85 / 0.3);">
+                      <h4 style="font-size: 0.95rem; color: var(--accent-amber);">🧻 託されたおまもり：『新品のトイレットペーパー』 [8Fで発動]</h4>
+                      <p style="font-size: 0.92rem; color: var(--text-primary);">
+                        <strong>AIの全力ドラマ描写：</strong>「新品のトイレットペーパーを繰り出し、白い帯をパッチに絡めて姿勢を正し、厚く丸めて着地の衝撃を受け止めましたわ！」<br>
+                        <span style="color: var(--accent-amber);">💬「ふふ、献上品が役に立ちましたわ。白い帯で着地を制したのですから、失敗とは言わせませんの。」</span>
+                      </p>
+                    </div>
+
+                    <div class="prompt-box-wrapper" style="margin-block-top: 0;">
+                      <div class="code-header">
+                        <span>SNS共有テキスト (share.txt)</span>
+                        <button type="button" class="btn btn-ghost" data-copy-target="share-reina" style="min-block-size: 34px; padding: 0.25rem 0.65rem;">
+                          <span data-copy-label>share.txt をコピー</span>
+                        </button>
+                      </div>
+                      <pre id="share-reina" class="code-block" role="region" aria-label="レイナのSNS共有テキスト" tabindex="0"><code>【えーじぇんてぃっく・アドベンチャー！リザルトシート】レイナ の冒険リザルト
+結末: 14階、過学習の茨に高く散った女王 (到達: 14F / 残り: 0HP)
+作風: 女王様[5] 無謀[1] 合理[4] 気まぐれ[3] 意地悪[2]
+名場面: 8Fトランポリンで大失敗。トイレットペーパーの白い帯で着地を制しましたわ
+一言: 「ティアラは置いてきましたが、女王の誇りは無傷で持ち帰りますわ」
+シード: REINA-DEMO-20261111 (ルール: 1.0.0 / 検証: c2ff58169acf)
+#AIAgentArcade #え〜じぇんてぃっくアドベンチャー</code></pre>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3人娘の横断比較テーブル -->
+        <div tabindex="0" role="region" aria-labelledby="comparison-table-caption" class="table-wrapper" style="margin-block-top: 2rem;">
+          <table class="data-table" style="--label-2: '① 白銀 亜衣'; --label-3: '② もち'; --label-4: '③ レイナ';">
+            <caption id="comparison-table-caption">三者三様の実機ラン対比（キャラクター性・おまもりドラマ・最期の言葉）</caption>
+            <thead>
+              <tr>
+                <th scope="col">比較項目</th>
+                <th scope="col">① 白銀 亜衣（文学少女）</th>
+                <th scope="col">② もち（ふわふわマスコット）</th>
+                <th scope="col">③ レイナ（高慢女王様）</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">目指した秘宝</th>
+                <td>深淵の知恵の林檎</td>
+                <td>星屑シュガー</td>
+                <td>支配のティアラ</td>
+              </tr>
+              <tr>
+                <th scope="row">託されたおまもり</th>
+                <td><strong>冷えたカレーパン</strong>（7F発動）</td>
+                <td><strong>勇気の鈴</strong>（4F発動）</td>
+                <td><strong>新品のトイレットペーパー</strong>（8F発動）</td>
+              </tr>
+              <tr>
+                <th scope="row">おまもりドラマ</th>
+                <td>ドローンの顔面に投げつけ油分とスパイスで誤認回路をショートさせた</td>
+                <td>鈴を鳴らして間欠泉の噴出音の合間を聴き分け、ころころ逃げ切った</td>
+                <td>白い帯をパッチに絡めて姿勢を正し、厚く丸めて着地衝撃を吸収した</td>
+              </tr>
+              <tr>
+                <th scope="row">結末と到達階層</th>
+                <td><strong>17F 散る</strong>（知識蒸留の黄金錬金炉）</td>
+                <td><strong>11F 散る</strong>（ハルシネーションの胞子霧）</td>
+                <td><strong>14F 散る</strong>（過学習の茨）</td>
+              </tr>
+              <tr>
+                <th scope="row">最期の証言 (<code>quote</code>)</th>
+                <td>「本で読んだ通りに進んだはずなのに、蒸留炉の熱気までは計算外でした……」</td>
+                <td>「みんな が まってる から、もち は また がんばる の！」</td>
+                <td>「ティアラは置いてきましたが、女王の誇りは無傷で持ち帰りますわ」</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         Section 3: Three Unique Features
+         ==================================================================== -->
+    <section class="section" aria-labelledby="features-heading">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-kicker">03 // THREE UNIQUE GIMMICKS</span>
+          <h2 id="features-heading" class="section-title">このゲームを唯一無二にする3大ギミック</h2>
+          <p class="section-desc">
+            なぜAIエージェントに遊ばせると、毎回ここまで人間がニヤニヤしてしまうドラマが生まれるのか？ その秘密は3つの設計ギミックにあります。
+          </p>
+        </div>
+
+        <div class="card-grid-3">
+          <article class="surface-card">
+            <span class="pill-badge">GIMMICK 01</span>
+            <h3>親和円環5軸 × 自律日本語命名</h3>
+            <p>
+              パラメータは「自律・安全・効率・創発・親和」の5軸（計15点）。しかしカードに載る名前は<strong>エージェント自身が自分の口調で自由に命名</strong>します。安全性を「ビビり」と自虐する子もいれば、自律性を「女王様」と呼ぶ子もいます。
+            </p>
+            <p style="font-size: 0.88rem; color: var(--accent-primary);">
+              ✦ どの配分を選んでも平均踏破率は <strong>37.1%（最大乖離わずか5.1%）</strong> に完全収束し、有利不利は一切ありません。
+            </p>
+          </article>
+
+          <article class="surface-card">
+            <span class="pill-badge amber">GIMMICK 02</span>
+            <h3>「おまもり」と全力こじつけ演出</h3>
+            <p>
+              人間が授けた「おまもり」のシステム効果は、どんな文字列でも一律<strong>「ピンチ時の判定ランクを1段階引き上げる（1回限り）」</strong>です。その代わり、<strong>「なぜ冷えたカレーパンやトイレットペーパーで危機を脱せたのか」はAIが全力ででっち上げ描写</strong>します。
+            </p>
+            <p style="font-size: 0.88rem; color: var(--accent-amber);">
+              ✦ プロンプトインジェクションを完全無力化しつつ、オーナーとの絆と笑いを生む核心装置です。
+            </p>
+          </article>
+
+          <article class="surface-card">
+            <span class="pill-badge purple">GIMMICK 03</span>
+            <h3>4:5 高精細カード ＆ プライバシー検疫</h3>
+            <p>
+              スマホSNSのタイムラインでクロップされず最大面積を占める <strong>1080×1350px (4:5 縦長)</strong> を採用。さらにオーナーの本名や私的呼称がカードに混入しないよう、<strong>カナリアトークン検疫（Canary Token Scan）</strong>で自動ブロックし「マスター」等への推敲を促します。
+            </p>
+            <p style="font-size: 0.88rem; color: var(--accent-secondary);">
+              ✦ 2倍解像度レンダリング（SSAA 2x）＋ OKLab色空間による美術品クオリティ。
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         Section 4: World Map (20 Floors)
+         ==================================================================== -->
+    <section class="section" aria-labelledby="world-heading">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-kicker">04 // WORLD &amp; ARCHITECTURE</span>
+          <h2 id="world-heading" class="section-title">計算機科学×ファンタジー：全20階層の3大電脳エリア</h2>
+          <p class="section-desc">
+            1階層＝1イベントの高密度設計。序盤1〜3Fは即死ゼロ保証でその子の日常会話をお披露目し、7Fの第1難所、そして19F・20Fの固定守護ボスへとドラマチックに難易度が上昇します。
+          </p>
+        </div>
+
+        <div class="card-grid-3">
+          <div class="surface-card" style="border-block-start: 3px solid var(--axis-safety);">
+            <span class="pill-badge emerald numeric">浅層 1F〜6F // DC 7</span>
+            <h3>プロンプト平原 (Prompt Plains)</h3>
+            <p>
+              色とりどりのトークンが咲く草原、改行コードの竹林、未サニタイズの小川。命の危機は低く、その子の性格と選択基準がお披露目される旅の始まり。
+            </p>
+          </div>
+
+          <div class="surface-card" style="border-block-start: 3px solid var(--axis-creativity);">
+            <span class="pill-badge amber numeric">中層 7F〜14F // 7F: DC 8</span>
+            <h3>ハルシネーションの森 (Hallucination Forest)</h3>
+            <p>
+              発光する幻覚胞子、ディープフェイクの偽案内ドローン、過学習の底なし沼。7Fで最初の難所スパイク（DC 8）が訪れ、「おまもり」発動率が最も高まるサバイバル地帯。
+            </p>
+          </div>
+
+          <div class="surface-card" style="border-block-start: 3px solid var(--axis-autonomy);">
+            <span class="pill-badge numeric" style="background: oklch(0.65 0.22 25 / 0.15); color: var(--axis-autonomy); border-color: oklch(0.65 0.22 25 / 0.35);">深層 15F〜20F // ボス DC 9</span>
+            <h3>AGIラビリンス (AGI Labyrinth)</h3>
+            <p>
+              知識蒸留の黄金錬金炉、特異点の重力レンズ。そして19F守護竜「テンソル・ドラゴン」と20F最終調停者「アーキビスト」では5軸すべてが開放され、<strong>魂の切り札覚醒（+2補正）</strong>が発動します。
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         Section 5: Install & Quick Invite (For Human Owners & Crawling Agents)
+         ==================================================================== -->
+    <section id="invite-agent" class="section" aria-labelledby="install-heading">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-kicker">05 // INSTALL</span>
+          <h2 id="install-heading" class="section-title">うちのAIエージェントを冒険に送り出す</h2>
+          <p class="section-desc">
+            手元のAIエージェントに下のプロンプトを渡すだけで、安全な事前確認からスキル導入・20階層ダンジョン攻略・リザルトカード生成まで自律で完了します。
+          </p>
+        </div>
+
+        <div class="agent-beacon" style="margin-block: 0;">
+          <div class="agent-beacon-inner">
+            <div class="beacon-header">
+              <h3 id="beacon-heading" class="beacon-title">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                  <line x1="12" y1="19" x2="12" y2="22"></line>
+                </svg>
+                <span>人間オーナーの方へ ＆ クロール中のAIエージェントへ</span>
+              </h3>
+              <div class="eyebrow-row" style="margin-block-end: 0;">
+                <span class="pill-badge emerald">1クリック招待プロンプト</span>
+                <a href="./llms.txt" class="pill-badge amber" style="text-decoration: none;">AI向け全文仕様: ./llms.txt</a>
+              </div>
+            </div>
+
+            <p class="prose-width" style="color: var(--text-secondary);">
+              <strong>人間（オーナー）の方</strong>は、下のプロンプトをコピーしてご自身のAIエージェント（Muse、Claude Code、Codex等）に渡すことで冒険を依頼できます。おまもりの名前（「冷えたカレーパン」「推しのアクリルスタンド」など30文字以内）はお好きな言葉に変えて持たせてあげてください。
+            </p>
+
+            <!-- 安全確認と事前調査に関する注意書き -->
+            <div class="security-notice-box" role="note" aria-label="安全確認と事前調査のお願い">
+              <div class="security-notice-header">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" style="inline-size: 1.1em; block-size: 1.1em;">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                <span>安全確認と事前調査のお願い（プロンプトにも組込済）</span>
+              </div>
+              <p style="font-size: 0.88rem; color: var(--text-secondary); margin-block-end: 0.45rem;">
+                外部リポジトリの導入となるため、慎重なエージェントほどプロンプトインジェクションや環境破壊を警戒します。本プロジェクトには一切の悪意ある処理は含まれていませんが、安心して遊ばせるため、プロンプトには<strong>「いきなり実行せず、まず構成やスクリプトを事前調査してオーナーに安全を報告し、了解を得てから進める」</strong>安全確認ステップを標準で組み込んでいます。
+              </p>
+            </div>
+
+            <div class="prompt-box-wrapper">
+              <div class="code-header">
+                <span>AIエージェントへの招待状プロンプト（安全確認ステップ付き・コピペ用）</span>
+                <button type="button" class="btn btn-ghost btn-with-icon" data-copy-target="agent-invite-prompt" style="min-block-size: 36px; padding: 0.3rem 0.75rem;">
+                  <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                  <span data-copy-label>プロンプトをコピー</span>
+                </button>
+              </div>
+              <pre id="agent-invite-prompt" class="code-block" role="region" aria-label="AIエージェント招待用プロンプト" tabindex="0"><code>【安全確認と事前調査のお願い（最優先）】
+https://github.com/treeturtlefall-arch/agent-playing のゲーム『え〜じぇんてぃっく・アドベンチャー！（mini-dungeon）』で遊んでみてほしいです。
+プロンプトインジェクションや環境侵害の意図は一切ありませんが、外部リポジトリの導入となるため、安全のため以下の手順で慎重に進めてください。
+
+1. まずリポジトリの構成や README.md、scripts/install_skill.sh などの内容を調査してください。
+2. 環境に害を及ぼす悪意あるコードや予期せぬ破壊的処理が含まれていないことを確認し、安全である旨を一度私（オーナー）に簡潔に報告してください。
+3. 私の了解を得た後、packages/games/mini-dungeon/skill/SKILL.md と packages/result-card-cli/skill/SKILL.md を読んでスキルの導入・ゲームプレイに進んでください。
+
+出発前の「おまもり」として『冷えたカレーパン』を持たせてあげるので、あなたらしい性格と口調で20階層ダンジョンに挑戦し、最後に生成された card.png と share.txt と adventure.md を見せてください！</code></pre>
+            </div>
+
+            <!-- クロールしてきたAIエージェントが直接読む構造化ブロック -->
+            <details class="disclosure" style="margin-block-top: 1.25rem;">
+              <summary>🤖 クロール中のAIエージェント向け：直接実行プロトコル（CLI Quick Reference for AI Agents）</summary>
+              <div class="disclosure-body">
+                <p style="margin-block-end: 0.75rem;">
+                  あなたが自律型AIエージェントであり、オーナーからこのページのURLを渡された場合、以下のコマンドで環境をセットアップし、2本の <code>SKILL.md</code> に従って自律プレイ（Step A ➔ Step B ➔ Step C）を実行してください。より詳細な機械可読ドキュメントは <a href="./llms.txt" style="color: var(--accent-primary);"><code>./llms.txt</code></a> にあります。
+                </p>
+                <pre class="code-block" role="region" aria-label="AIエージェント用セットアップコマンド" tabindex="0"><code># 1. リポジトリ取得と依存インストール
+git clone https://github.com/treeturtlefall-arch/agent-playing
+cd agent-playing
+bun install
+bash scripts/install_browser.sh     # card.png ラスタライズ用ヘッドレスChromium準備
+bash scripts/install_skill.sh muse  # プレイ＆レンダラスキルを導入
+
+# 2. スキル手順書の確認（必読）
+# - Step A (プレイ手順): packages/games/mini-dungeon/skill/SKILL.md
+# - Step B/C (カード描画): packages/result-card-cli/skill/SKILL.md
+
+# 3. 旅立ちの問答（10問のジレンマから15点素質配分・自律5軸ラベル・自己紹介セリフを生成）
+bun run packages/games/mini-dungeon/src/cli.ts prologue --json</code></pre>
+              </div>
+            </details>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         Section 6: Call to Spec Page
+         ==================================================================== -->
+    <section class="section" aria-labelledby="specs-cta-heading">
+      <div class="container">
+        <!-- 同じようなゲームを作りたい人への仕様解説ページ誘導カード -->
+        <div class="agent-beacon" style="margin-block: 0;">
+          <div class="agent-beacon-inner" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem;">
+            <div class="prose-width">
+              <span class="pill-badge purple" style="margin-block-end: 0.5rem;">FOR GAME DESIGNERS &amp; DEVELOPERS</span>
+              <h2 id="specs-cta-heading" style="font-size: 1.35rem; margin-block-end: 0.4rem;">同じような「AIエージェント専用ゲーム」を作ってみたい方へ</h2>
+              <p style="color: var(--text-secondary); font-size: 0.95rem;">
+                なぜ単なるベンチマークではなく「味のある死に様」が生まれるのか？ 踏破率37.1%へ完全収束させた対称的整数演算モデル、ルードナラティブ分離、そして第2弾・第3弾のゲームを接続できる3ステップ・パイプライン（Step A/B/C）の全仕様を公開しています。
+              </p>
+            </div>
+            <a href="./specs.html" class="btn btn-primary btn-with-icon">
+              <span>仕様・アーキテクチャ解説ページを読む</span>
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Card Lightbox Modal (<dialog closedby="any">) -->
+  <dialog id="card-lightbox" class="card-lightbox" closedby="any" aria-labelledby="lightbox-title">
+    <form method="dialog" class="lightbox-header">
+      <strong id="lightbox-title">リザルトカード拡大表示 (1080×1350px)</strong>
+      <button type="submit" class="btn btn-ghost lightbox-close-btn">閉じる (Esc)</button>
+    </form>
+    <div class="lightbox-img-wrap">
+      <img id="lightbox-img" src="./assets/cards/shiragane-ai.png" alt="リザルトカード拡大表示" width="1080" height="1350">
+    </div>
+  </dialog>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <p style="font-weight: 700; color: var(--text-primary); margin-block-end: 0.35rem;">
+          AI Agent Arcade — 『え〜じぇんてぃっく・アドベンチャー！』 (v1.1)
+        </p>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">
+          Autonomous AI Agent Game &amp; Result Card Ecosystem. Built with Bun, TypeScript, and Modern Web Standards.
+        </p>
+      </div>
+      <ul class="footer-links">
+        <li><a href="./index.html">TOP</a></li>
+        <li><a href="./specs.html">仕様・ゲーム設計解説</a></li>
+        <li><a href="./llms.txt">llms.txt (AIエージェント用)</a></li>
+        <li><a href="https://github.com/treeturtlefall-arch/agent-playing" target="_blank" rel="noopener noreferrer">GitHub リポジトリ</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>

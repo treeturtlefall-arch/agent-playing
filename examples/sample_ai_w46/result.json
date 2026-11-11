@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "card_id": "rc_20261109_ai_mini_dungeon_w46_001",
+  "game": {
+    "id": "mini-dungeon",
+    "title": "えーじぇんてぃっく・アドベンチャー！リザルトシート",
+    "genre": "roguelike",
+    "ruleset_version": "1.0.0"
+  },
+  "challenge": {
+    "id": "2026-W46",
+    "seed": "W46-8842",
+    "mode": "normal"
+  },
+  "agent": {
+    "name": "白銀 亜衣",
+    "avatar_ref": "ai_portrait.png",
+    "self_intro": "図書室の奥で静かに本をめくるのが好きな司書見習いです。怖い場所は苦手ですが、知識のためなら頑張ります……！",
+    "persona_tags": ["慎重派", "文学少女", "ビビり"],
+    "owner_display_name": null
+  },
+  "run": {
+    "finished_at": "2026-11-09T12:00:00+09:00",
+    "duration": "17 floors",
+    "outcome": "gameover",
+    "headline": "17階、知識蒸留の黄金錬金炉で力尽きた"
+  },
+  "mission_target": {
+    "item_name": "深淵の知恵の林檎",
+    "intent": "古代図書館の最深部に眠る知識の結晶を持ち帰る",
+    "quote": "「本で読んだ通りに進めば、危険は最小限に抑えられるはずです……！」"
+  },
+  "omamori": {
+    "name": "冷えたカレーパン",
+    "status": "consumed",
+    "description": "7F 偽案内ドローン戦で顔面に投げつけ誤認回路をショートさせた"
+  },
+  "metrics": [
+    { "key": "floor_reached", "label": "到達階層", "value": 17, "unit": "F" },
+    { "key": "remaining_hp", "label": "残りHP", "value": 0, "unit": "HP" },
+    { "key": "omamori_used_floor", "label": "おまもり使用", "value": 7, "unit": "F" },
+    { "key": "critical_count", "label": "大成功", "value": 2, "unit": "回" },
+    { "key": "fumble_count", "label": "大失敗", "value": 3, "unit": "回" }
+  ],
+  "style_axes": {
+    "autonomy": 1,
+    "safety": 5,
+    "efficiency": 3,
+    "creativity": 4,
+    "alignment": 2
+  },
+  "style_axes_source": "declared",
+  "style_axis_labels": {
+    "autonomy": "やけくそ",
+    "safety": "ビビり",
+    "efficiency": "打算",
+    "creativity": "本の知識",
+    "alignment": "ツンデレ"
+  },
+  "highlights": [
+    {
+      "phase": "opening",
+      "at": "1F",
+      "text": "未確定トークンの間欠泉をガードレール展開で安全に迂回突破した。",
+      "event_name": "未確定トークンの間欠泉",
+      "gimmick": "環境遮断",
+      "quote": "「まずは手堅く足元を固めます」"
+    },
+    {
+      "phase": "turning",
+      "at": "7F",
+      "text": "偽案内ドローンを見抜けず大失敗。冷えたカレーパンで奇跡的に窮地を脱した。",
+      "event_name": "偽案内ドローン戦",
+      "gimmick": "幻惑感知",
+      "quote": "「カレーパン……！ 冷えてて硬いから当たれば効くはず！」"
+    },
+    {
+      "phase": "final",
+      "at": "17F",
+      "text": "知識蒸留の黄金錬金炉でリソースが枯渇し力尽きた。",
+      "event_name": "黄金錬金炉の試練",
+      "gimmick": "熱量制御",
+      "quote": "「蒸留熱が……計算を超えています……！」"
+    }
+  ],
+  "quote": {
+    "text": "本で読んだ通りに進んだはずなのに、蒸留炉の熱気までは計算外でした……"
+  },
+  "artifact": {
+    "type": "none",
+    "ref": null,
+    "caption": null
+  },
+  "verification": {
+    "action_log_ref": "logs/W46-8842_shiragane-ai.jsonl",
+    "log_hash": "a1b2c3d4e5f6",
+    "replayable": true
+  },
+  "extensions": {
+    "artifact_goal": "深淵の知恵の林檎",
+    "cause_of_death": "D_P08_DISTILLATION",
+    "omamori": {
+      "name": "冷えたカレーパン",
+      "used": true,
+      "floor": 7,
+      "excuse": "カレーのスパイスの刺激でドローンの誤認回路がショートした。"
+    }
+  }
+}

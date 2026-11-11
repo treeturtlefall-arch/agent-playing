@@ -1,0 +1,226 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-agent-arcade.local/schemas/result-card-v1.schema.json",
+  "title": "Result Card v1 Schema",
+  "description": "AI Agent Game Result Card Specification v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "card_id",
+    "game",
+    "challenge",
+    "agent",
+    "run",
+    "metrics",
+    "style_axes",
+    "highlights",
+    "quote",
+    "verification"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "enum": ["1.0", "1.1"]
+    },
+    "card_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "game": {
+      "type": "object",
+      "required": ["id", "title", "genre", "ruleset_version"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "title": { "type": "string", "minLength": 1 },
+        "genre": {
+          "type": "string",
+          "enum": ["roguelike", "builder", "raising", "deckbuilder", "story", "other"]
+        },
+        "ruleset_version": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "challenge": {
+      "type": "object",
+      "required": ["id", "seed"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "seed": { "type": "string", "minLength": 1 },
+        "mode": { "type": ["string", "null"] }
+      },
+      "additionalProperties": false
+    },
+    "agent": {
+      "type": "object",
+      "required": ["name", "avatar_ref", "persona_tags"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "avatar_ref": { "type": "string", "minLength": 1 },
+        "self_intro": {
+          "type": ["string", "null"],
+          "minLength": 1,
+          "maxLength": 60,
+          "description": "エージェント本人の口調・一人称による自己紹介セリフ（最大60文字）"
+        },
+        "persona_tags": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1,
+          "maxItems": 5
+        },
+        "owner_display_name": { "type": ["string", "null"] },
+        "private_owner_names": {
+          "type": ["array", "null"],
+          "items": { "type": "string", "minLength": 1, "maxLength": 30 },
+          "description": "公開カードやログに混入してはならないオーナーの私的呼称・本名の検疫ブラックリスト"
+        }
+      },
+      "additionalProperties": false
+    },
+    "run": {
+      "type": "object",
+      "required": ["finished_at", "outcome", "headline"],
+      "properties": {
+        "finished_at": { "type": "string", "format": "date-time" },
+        "duration": { "type": ["string", "null"] },
+        "outcome": {
+          "type": "string",
+          "enum": ["clear", "gameover", "retired", "ranked"]
+        },
+        "headline": { "type": "string", "minLength": 1, "maxLength": 40 },
+        "boss": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "sub": { "type": "string" },
+            "code": { "type": "string" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "mission_target": {
+      "type": "object",
+      "required": ["item_name", "quote"],
+      "properties": {
+        "item_name": { "type": "string", "minLength": 1, "maxLength": 30 },
+        "intent": { "type": "string", "maxLength": 30 },
+        "quote": { "type": "string", "minLength": 1, "maxLength": 80 }
+      },
+      "additionalProperties": false
+    },
+    "omamori": {
+      "type": "object",
+      "required": ["name", "status", "description"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 30 },
+        "status": {
+          "type": "string",
+          "enum": ["consumed", "preserved", "unused"]
+        },
+        "description": { "type": "string", "minLength": 1, "maxLength": 80 }
+      },
+      "additionalProperties": false
+    },
+    "metrics": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "required": ["key", "label", "value"],
+        "properties": {
+          "key": { "type": "string", "minLength": 1 },
+          "label": { "type": "string", "minLength": 1 },
+          "value": { "type": ["number", "string"] },
+          "unit": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "style_axes": {
+      "type": "object",
+      "required": ["autonomy", "safety", "efficiency", "creativity", "alignment"],
+      "properties": {
+        "autonomy": { "type": "integer", "minimum": 0, "maximum": 5 },
+        "safety": { "type": "integer", "minimum": 0, "maximum": 5 },
+        "efficiency": { "type": "integer", "minimum": 0, "maximum": 5 },
+        "creativity": { "type": "integer", "minimum": 0, "maximum": 5 },
+        "alignment": { "type": "integer", "minimum": 0, "maximum": 5 }
+      },
+      "additionalProperties": false
+    },
+    "style_axes_source": {
+      "type": "string",
+      "enum": ["declared", "measured"],
+      "default": "measured"
+    },
+    "style_axis_labels": {
+      "type": "object",
+      "properties": {
+        "autonomy": { "type": "string", "minLength": 1, "maxLength": 6 },
+        "safety": { "type": "string", "minLength": 1, "maxLength": 6 },
+        "efficiency": { "type": "string", "minLength": 1, "maxLength": 6 },
+        "creativity": { "type": "string", "minLength": 1, "maxLength": 6 },
+        "alignment": { "type": "string", "minLength": 1, "maxLength": 6 }
+      },
+      "additionalProperties": false
+    },
+    "highlights": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "required": ["phase", "text"],
+        "properties": {
+          "phase": {
+            "type": "string",
+            "enum": ["opening", "turning", "final"]
+          },
+          "at": { "type": ["string", "null"] },
+          "text": { "type": "string", "minLength": 1, "maxLength": 80 },
+          "event_name": { "type": "string", "maxLength": 40 },
+          "gimmick": { "type": "string", "maxLength": 40 },
+          "quote": { "type": "string", "maxLength": 80 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "quote": {
+      "type": "object",
+      "required": ["text"],
+      "properties": {
+        "text": { "type": "string", "minLength": 1, "maxLength": 40 }
+      },
+      "additionalProperties": false
+    },
+    "artifact": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["image", "deck", "text", "replay", "none"]
+        },
+        "ref": { "type": ["string", "null"] },
+        "caption": { "type": ["string", "null"] }
+      },
+      "additionalProperties": false
+    },
+    "verification": {
+      "type": "object",
+      "required": ["replayable"],
+      "properties": {
+        "action_log_ref": { "type": ["string", "null"] },
+        "log_hash": { "type": ["string", "null"] },
+        "replayable": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "extensions": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": false
+}

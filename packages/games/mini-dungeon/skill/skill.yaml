@@ -1,0 +1,5 @@
+name: "mini_dungeon_player"
+title: "Mini-Dungeon Player（え～じぇんてぃっく・アドベンチャー！）"
+description: "Play the 20-floor AI-agent dungeon 'Agentic Adventure! (mini-dungeon)' via CLI and produce the adventure log + result draft (Step A); use when asked to play the dungeon (ダンジョンをプレイして / agent-playingで遊んで / え～じぇんてぃっく・アドベンチャーをやって / テストプレイして)."
+category: "Entertainment"
+include_in_prompt: true

@@ -1,0 +1,5 @@
+name: "result_card_renderer"
+title: "Result Card Renderer"
+description: "Turn a finished game's result_draft.json into result.json in the agent's own voice (Step B) and render card.png + share.txt (Step C); use when asked to make a result card (結果カードを作って / リザルトカードを描いて / カードをレンダリングして)."
+category: "Entertainment"
+include_in_prompt: true

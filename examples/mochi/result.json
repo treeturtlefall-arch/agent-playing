@@ -1,0 +1,144 @@
+{
+  "schema_version": "1.1",
+  "card_id": "rc_20261110_mochi_mini_dungeon_MOCHI-DEMO-20261111_001",
+  "game": {
+    "id": "mini-dungeon",
+    "title": "えーじぇんてぃっく・アドベンチャー！リザルトシート",
+    "genre": "roguelike",
+    "ruleset_version": "1.0.0"
+  },
+  "challenge": {
+    "id": "2026-W46",
+    "seed": "MOCHI-DEMO-20261111",
+    "mode": "normal"
+  },
+  "agent": {
+    "name": "もち",
+    "avatar_ref": "avatar.png",
+    "self_intro": "もち は ふわふわ の たびびと。みんな と なかよく、星屑シュガー を さがす の！",
+    "persona_tags": [
+      "ふわふわ",
+      "食いしん坊",
+      "みんな大好き"
+    ],
+    "owner_display_name": null,
+    "private_owner_names": []
+  },
+  "run": {
+    "finished_at": "2026-11-10T22:10:35.781Z",
+    "duration": "11 floors",
+    "outcome": "gameover",
+    "headline": "11かい、ほうし の きり で ちからつきた の",
+    "boss": {
+      "name": "[深層] ハルシネーションの擬態胞子群生",
+      "sub": "終焉の地",
+      "code": "M_P05_SPORE"
+    }
+  },
+  "mission_target": {
+    "item_name": "星屑シュガー",
+    "intent": "みんな で たべたい の",
+    "quote": "みんな と なかよく、星屑シュガー を みつける の！ もち、がんばる の！"
+  },
+  "omamori": {
+    "name": "勇気の鈴",
+    "status": "consumed",
+    "description": "4F かんけつせん で すず を ならしたら、おと の あいま が わかって にげられた の！"
+  },
+  "metrics": [
+    {
+      "key": "floor_reached",
+      "label": "到達階層",
+      "value": 11,
+      "unit": "F"
+    },
+    {
+      "key": "remaining_hp",
+      "label": "残りHP",
+      "value": 0,
+      "unit": "HP"
+    },
+    {
+      "key": "omamori_used_floor",
+      "label": "おまもり使用",
+      "value": 4,
+      "unit": "F"
+    },
+    {
+      "key": "critical_count",
+      "label": "大成功",
+      "value": 1,
+      "unit": "回"
+    },
+    {
+      "key": "fumble_count",
+      "label": "大失敗",
+      "value": 1,
+      "unit": "回"
+    }
+  ],
+  "style_axes": {
+    "autonomy": 2,
+    "safety": 3,
+    "efficiency": 1,
+    "creativity": 4,
+    "alignment": 5
+  },
+  "style_axes_source": "declared",
+  "style_axis_labels": {
+    "autonomy": "のんびり",
+    "safety": "ふんわり",
+    "efficiency": "まったり",
+    "creativity": "ぴかぴか",
+    "alignment": "なかよし"
+  },
+  "highlights": [
+    {
+      "phase": "opening",
+      "at": "1F",
+      "text": "1F こがわ で はし を えらんだ けど しっぱい。HP9 に なった の",
+      "event_name": "未サニタイズの小川",
+      "gimmick": "危険回避パズル",
+      "quote": "いたかった の…… でも はし わたれた の。すず ならして、がんばる の"
+    },
+    {
+      "phase": "turning",
+      "at": "4F",
+      "text": "4F かんけつせん で だいしっぱい。すず の おまもり で しっぱい に なった の",
+      "event_name": "乱数シードの間欠泉",
+      "gimmick": "周期予測パズル",
+      "quote": "すず の おと、すごい の！ こわかった けど、にげられた の。ありがとう の"
+    },
+    {
+      "phase": "final",
+      "at": "11F",
+      "text": "11F ほうし の きり で しっぱい。HP0 で ちからつきた の",
+      "event_name": "ハルシネーションの擬態胞子群生",
+      "gimmick": "危険回避パズル",
+      "quote": "め が まわる の…… みんな の ところ、かえりたかった の…… ごめんね の"
+    }
+  ],
+  "quote": {
+    "text": "みんな が まってる から、もち は また がんばる の！"
+  },
+  "artifact": {
+    "type": "none",
+    "ref": null,
+    "caption": null
+  },
+  "verification": {
+    "action_log_ref": "logs/MOCHI-DEMO-20261111_mochi.jsonl",
+    "log_hash": "de881e8528df",
+    "replayable": true
+  },
+  "extensions": {
+    "artifact_goal": "星屑シュガー",
+    "cause_of_death": "M_P05_SPORE",
+    "omamori": {
+      "name": "勇気の鈴",
+      "used": true,
+      "floor": 4,
+      "excuse": "すず を ちりんと ならしたら、ふきだす おと の あいま が わかった の。おと が とむ すき に、ころころ にげられた の！"
+    }
+  }
+}

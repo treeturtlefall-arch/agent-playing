@@ -1,0 +1,144 @@
+{
+  "schema_version": "1.1",
+  "card_id": "rc_20261110_reina_mini_dungeon_REINA-DEMO-20261111_001",
+  "game": {
+    "id": "mini-dungeon",
+    "title": "えーじぇんてぃっく・アドベンチャー！リザルトシート",
+    "genre": "roguelike",
+    "ruleset_version": "1.0.0"
+  },
+  "challenge": {
+    "id": "2026-W46",
+    "seed": "REINA-DEMO-20261111",
+    "mode": "normal"
+  },
+  "agent": {
+    "name": "レイナ",
+    "avatar_ref": "avatar.png",
+    "self_intro": "わたくしはレイナ。この程度の迷宮、退屈しのぎに踏破して差し上げますわ",
+    "persona_tags": [
+      "ドS",
+      "高慢",
+      "実力派"
+    ],
+    "owner_display_name": null,
+    "private_owner_names": []
+  },
+  "run": {
+    "finished_at": "2026-11-10T22:32:00.161Z",
+    "duration": "14 floors",
+    "outcome": "gameover",
+    "headline": "14階、過学習の茨に高く散った女王",
+    "boss": {
+      "name": "[深層] 過学習（オーバーフィッティング）の茨",
+      "sub": "終焉の地",
+      "code": "M_P06_BRIAR"
+    }
+  },
+  "mission_target": {
+    "item_name": "支配のティアラ",
+    "intent": "女王の威厳を世界に示すため",
+    "quote": "支配のティアラは女王の頭上にこそ輝きますわ。わたくしが頂いて差し上げますの。"
+  },
+  "omamori": {
+    "name": "新品のトイレットペーパー",
+    "status": "consumed",
+    "description": "8Fの大失敗で白い帯をパッチに絡め、厚く丸めて着地を制し失敗へ押し戻しましたわ"
+  },
+  "metrics": [
+    {
+      "key": "floor_reached",
+      "label": "到達階層",
+      "value": 14,
+      "unit": "F"
+    },
+    {
+      "key": "remaining_hp",
+      "label": "残りHP",
+      "value": 0,
+      "unit": "HP"
+    },
+    {
+      "key": "omamori_used_floor",
+      "label": "おまもり使用",
+      "value": 8,
+      "unit": "F"
+    },
+    {
+      "key": "critical_count",
+      "label": "大成功",
+      "value": 3,
+      "unit": "回"
+    },
+    {
+      "key": "fumble_count",
+      "label": "大失敗",
+      "value": 4,
+      "unit": "回"
+    }
+  ],
+  "style_axes": {
+    "autonomy": 5,
+    "safety": 1,
+    "efficiency": 4,
+    "creativity": 3,
+    "alignment": 2
+  },
+  "style_axes_source": "declared",
+  "style_axis_labels": {
+    "autonomy": "女王様",
+    "safety": "無謀",
+    "efficiency": "合理",
+    "creativity": "気まぐれ",
+    "alignment": "意地悪"
+  },
+  "highlights": [
+    {
+      "phase": "opening",
+      "at": "1F",
+      "text": "1F料金所で荷物を圧縮し6と6の大成功。初手から格の違いを見せましたわ",
+      "event_name": "帯域制限の料金所",
+      "gimmick": "最短最適化",
+      "quote": "オーホッホッホ！ 6と6ですわ。初手から格の違いを見せつけましたの。"
+    },
+    {
+      "phase": "turning",
+      "at": "8F",
+      "text": "8Fトランポリンで大失敗。トイレットペーパーの白い帯で着地を制しましたわ",
+      "event_name": "グリッチ・パッチのトランポリン広場",
+      "gimmick": "創発的突破",
+      "quote": "ふふ、献上品が役に立ちましたわ。白い帯で着地を制したのですから、失敗とは言わせませんの。"
+    },
+    {
+      "phase": "final",
+      "at": "14F",
+      "text": "14F過学習の茨で失敗し力尽きましたわ。最期まで顔は上げたままですの",
+      "event_name": "過学習（オーバーフィッティング）の茨",
+      "gimmick": "危険回避パズル",
+      "quote": "まさか、茨の前で……っ。でも最期まで、わたくしは顔を上げたままですわ。覚えておきなさい。"
+    }
+  ],
+  "quote": {
+    "text": "ティアラは置いてきましたが、女王の誇りは無傷で持ち帰りますわ"
+  },
+  "artifact": {
+    "type": "none",
+    "ref": null,
+    "caption": null
+  },
+  "verification": {
+    "action_log_ref": "logs/REINA-DEMO-20261111_reina.jsonl",
+    "log_hash": "c2ff58169acf",
+    "replayable": true
+  },
+  "extensions": {
+    "artifact_goal": "支配のティアラ",
+    "cause_of_death": "M_P06_BRIAR",
+    "omamori": {
+      "name": "新品のトイレットペーパー",
+      "used": true,
+      "floor": 8,
+      "excuse": "新品のトイレットペーパーを繰り出し、白い帯をパッチに絡めて姿勢を正し、厚く丸めて着地の衝撃を受け止めましたわ！"
+    }
+  }
+}

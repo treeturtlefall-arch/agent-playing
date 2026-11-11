@@ -1,0 +1,119 @@
+# ==============================================================================
+# 1. プライバシー・シークレット・ローカル設定（最優先で除外）
+# ==============================================================================
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.secret
+credentials.json
+*service-account*.json
+secrets/
+
+# テスト用キャラクター定義・個人プロファイル（エージェント人格・オーナー情報保護）
+test-Characters/
+test-characters/
+IDENTITY.md
+SOUL.md
+MEMORY.md
+USER.md
+HEARTBEAT.md
+
+# 開発用検証資料・サンプル自動出力（配布・インストール対象外）
+materials/stitch/
+examples/sample_ai_w46/out/
+
+# AIコーディングツール・エディタのローカル設定／セッション情報
+.gemini/
+.claude/
+.codex/
+.cursor/
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*.bak
+*.orig
+
+# ==============================================================================
+# 2. プレイログ・ランタイム出力・一時作業領域（本プロジェクト固有）
+# ==============================================================================
+runs/*
+!runs/.gitkeep
+.tmp/
+tmp/
+temp/
+*.tmp
+*.temp
+scratch/
+
+# リポジトリルート直下に誤って出力されたプレイ生成物・一時結果
+/state.json
+/result_draft.json
+/result.json
+/adventure.md
+/setup.json
+/omamori.txt
+/card.html
+/card.png
+/share.txt
+/avatar.png
+/avatar.jpg
+
+# ==============================================================================
+# 3. 依存関係・ビルド・テスト・キャッシュ（Node / Bun / TypeScript / Python）
+# ==============================================================================
+node_modules/
+.bun/
+.cache/
+/dist/
+/build/
+/out/
+*.tsbuildinfo
+*.tgz
+.eslintcache
+coverage/
+.nyc_output/
+*.lcov
+junit.xml
+.playwright/
+playwright-report/
+test-results/
+.puppeteer/
+
+# Python（補助スクリプト用）
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# ==============================================================================
+# 4. ログ・デバッグ出力
+# ==============================================================================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+bun-debug.log*
+
+# ==============================================================================
+# 5. OS固有の生成ファイル
+# ==============================================================================
+.DS_Store
+._*
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk

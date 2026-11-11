@@ -1,0 +1,17 @@
+{
+  "name": "@ai-agent-arcade/result-card-cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "result-card": "./src/index.ts"
+  },
+  "scripts": {
+    "start": "bun run ./src/index.ts"
+  },
+  "dependencies": {
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "sharp": "0.35.5"
+  }
+}

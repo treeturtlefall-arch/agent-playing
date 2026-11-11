@@ -1,0 +1,22 @@
+{
+  "name": "ai-agent-arcade",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI Agent Game & Result Card System for Muse and autonomous agents",
+  "workspaces": [
+    "packages/*",
+    "packages/games/*"
+  ],
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "mini-dungeon": "bun run packages/games/mini-dungeon/src/cli.ts",
+    "sim": "bun run packages/games/mini-dungeon/scripts/run-sim.ts",
+    "render:sample": "bun run packages/result-card-cli/src/index.ts render examples/sample_ai_w46/result.json --out examples/sample_ai_w46/out --json",
+    "validate:sample": "bun run packages/result-card-cli/src/index.ts validate examples/sample_ai_w46/result.json --json"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.4",
+    "typescript": "^7.0.2"
+  }
+}

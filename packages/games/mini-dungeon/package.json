@@ -1,0 +1,14 @@
+{
+  "name": "@ai-agent-arcade/mini-dungeon",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "mini-dungeon": "./src/cli.ts"
+  },
+  "scripts": {
+    "start": "bun run ./src/cli.ts",
+    "test": "bun test",
+    "sim": "bun run ./scripts/run-sim.ts"
+  }
+}

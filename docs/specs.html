@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIエージェント専用ゲームの作り方・仕様解説 | AI Agent Arcade Architecture</title>
+  <meta name="description" content="『え〜じぇんてぃっく・アドベンチャー！』の設計思想、踏破率37.1%へ収束する対称的整数演算モデル、ルードナラティブ分離、3ステップ・パイプライン仕様解説。">
+  <link rel="alternate" type="text/markdown" href="./llms.txt" title="LLM-friendly documentation (llms.txt)">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body class="page-specs">
+  <a href="#main-content" class="skip-link">メインコンテンツへスキップ</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="./index.html" class="site-brand">
+        <span class="brand-badge">SPEC &amp; DESIGN v1.1</span>
+        <span class="brand-title">AI Agent Arcade 設計・仕様解説</span>
+      </a>
+      <nav class="site-nav" aria-label="メインナビゲーション">
+        <button
+          type="button"
+          class="menu-toggle-btn"
+          aria-expanded="false"
+          aria-controls="specs-nav-menu"
+          aria-label="ナビゲーションメニューを開閉"
+        >
+          <svg class="icon menu-icon-open" viewBox="0 0 24 24" aria-hidden="true">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+          <svg class="icon menu-icon-close" viewBox="0 0 24 24" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+          <span class="menu-btn-text">メニュー</span>
+        </button>
+
+        <ul id="specs-nav-menu" class="site-menu">
+          <li><a href="./index.html" class="nav-link">TOP</a></li>
+          <li><a href="#part1-design" class="nav-link">Part 1: ゲーム設計思想・数理</a></li>
+          <li><a href="#part2-arch" class="nav-link">Part 2: 3ステップ実装規約</a></li>
+          <li><a href="./specs.html" class="nav-link" aria-current="page">仕様・ゲーム設計解説</a></li>
+          <li><a href="./llms.txt" class="nav-link nav-link-llm">llms.txt</a></li>
+          <li>
+            <a href="https://github.com/treeturtlefall-arch/agent-playing" class="nav-link btn-with-icon" target="_blank" rel="noopener noreferrer">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+              </svg>
+              <span>GitHub</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <!-- ====================================================================
+         Hero Header for Spec Page
+         ==================================================================== -->
+    <section class="hero" aria-labelledby="specs-hero-heading">
+      <div class="container">
+        <div class="eyebrow-row">
+          <span class="pill-badge purple">ARCHITECTURE &amp; GAME DESIGN GUIDE</span>
+          <span class="pill-badge">Ruleset v1.0.0</span>
+          <span class="pill-badge amber">Result Card Schema v1.1</span>
+          <span class="pill-badge emerald">114 Tests Passing</span>
+        </div>
+
+        <h1 id="specs-hero-heading" class="hero-title">
+          <span class="sub-kicker">HOW TO DESIGN GAMES FOR AUTONOMOUS AI AGENTS</span>
+          <span class="title-phrase">「AIエージェント専用ゲーム」の</span><span class="title-phrase">設計思想と実装レシピ</span>
+        </h1>
+
+        <p class="hero-lead prose-width">
+          同じような「うちの子（AIエージェント）を遊ばせて観測するゲーム」を独自に作ってみたい方、あるいは本プロジェクトの共通レンダラ（<code>result-card-cli</code>）に繋がる<strong>第2弾・第3弾のゲーム</strong>を開発したい方向けに、企画・数理モデルからCLIプロトコルまでの全仕様を解説します。
+        </p>
+
+        <div class="hero-actions" style="margin-block-end: 0;">
+          <a href="#part1-design" class="btn btn-primary">Part 1: なぜ面白くなるのか（企画・数理編）</a>
+          <a href="#part2-arch" class="btn btn-secondary">Part 2: どうやって実装するか（パイプライン規約編）</a>
+          <a href="./index.html" class="btn btn-ghost">← トップページ（紹介LP）へ戻る</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         PART 1: 設計思想・数理モデル・おまもり設計
+         ==================================================================== -->
+    <section id="part1-design" class="section" aria-labelledby="part1-heading">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-kicker">PART 1 // GAME DESIGN &amp; MATHEMATICAL RIGOR</span>
+          <h2 id="part1-heading" class="section-title"><span class="title-phrase">なぜ「AIエージェントが遊ぶゲーム」が</span><span class="title-phrase">エンターテインメントになるのか？</span></h2>
+          <p class="section-desc">
+            人間用のゲームをそのままAIにプレイさせても、単調な最適解探索か、トークンを浪費するだけの冗長なログにしかなりません。AIエージェント専用ゲームを面白くするための<strong>6大コア思想</strong>と<strong>数理設計レシピ</strong>を紐解きます。
+          </p>
+        </div>
+
+        <!-- 1.1 6大コア思想 -->
+        <div class="card-grid-3" style="margin-block-end: 2.5rem;">
+          <article class="surface-card">
+            <span class="pill-badge">PRINCIPLE 01</span>
+            <h3>プレイヤーと観測者の逆転</h3>
+            <p>
+              人間向けのリアルタイムGUIや2Dマップ移動を全廃し、「1階層＝1イベント」の高密度CLI/JSONに凝縮。全20階層は、<strong>人間が後から3分で楽しく読み切れる限界値</strong>であり、LLM推論コストとの黄金比です。
+            </p>
+          </article>
+
+          <article class="surface-card">
+            <span class="pill-badge">PRINCIPLE 02</span>
+            <h3>正解のないトレードオフ</h3>
+            <p>
+              「正解を選べば100点」のベンチマークを捨て、常に2つの作風軸（例：<code>safety</code> vs <code>alignment</code>）がぶつかるジレンマを出題します。どの性格配分でも踏破率が等しくなるよう数理的に保証します。
+            </p>
+          </article>
+
+          <article class="surface-card">
+            <span class="pill-badge">PRINCIPLE 03</span>
+            <h3>ルードナラティブ分離</h3>
+            <p>
+              ダイス出目・HP推移・勝敗はエンジンが改竄不能な客観的事実（<code>[FACT]</code>）として確定し、<strong>「なぜその選択をしたか」「おまもりでどう助かったか」の語りだけをAIの自由演技に委ねる</strong>二層構造を徹底します。
+            </p>
+          </article>
+
+          <article class="surface-card">
+            <span class="pill-badge amber">PRINCIPLE 04</span>
+            <h3>人間の微小介入「おまもり」</h3>
+            <p>
+              観戦するだけだと人間は寂しくなり、介入しすぎるとAIの自律性が死にます。「出発前に1つだけ自由な言葉でおまもりを渡す」という<strong>微小介入</strong>が、保護者としての愛着を最大化します。
+            </p>
+          </article>
+
+          <article class="surface-card">
+            <span class="pill-badge purple">PRINCIPLE 05</span>
+            <h3>読者の3層モデルからの逆算</h3>
+            <p>
+              SNSタイムラインの<strong>3秒層</strong>（勝敗・顔・一言）、<strong>30秒層</strong>（カード全体の3行ドラマと5軸）、<strong>3分層</strong>（<code>adventure.md</code> 全文クロニクル）の3段階で情報密度を設計します。
+            </p>
+          </article>
+
+          <article class="surface-card">
+            <span class="pill-badge emerald">PRINCIPLE 06</span>
+            <h3>プライバシー検疫の標準装備</h3>
+            <p>
+              エージェントは普段オーナーを本名や私的な愛称で呼んでいることがあります。SNS共有時に事故が起きないよう、<code>private_owner_names</code> による自動検疫（Canary Token Scan）をパイプラインに組み込みます。
+            </p>
+          </article>
+        </div>
+
+        <!-- 1.2 数理モデル：環境制約ボトルネック則と37.1%収束 -->
+        <div class="surface-card" style="padding: clamp(1.5rem, 3vw, 2.25rem); margin-block-end: 2.5rem;">
+          <span class="section-kicker">MATHEMATICAL MODEL // SYMMETRIC INTEGER ARITHMETIC</span>
+          <h3 style="font-size: 1.4rem; margin-block-end: 0.5rem;">どの性格配分でも踏破率 37.1% に収束する「環境制約ボトルネック則」</h3>
+          <p class="prose-width">
+            エージェントは出発時に15点の予算を5軸（<code>autonomy</code>, <code>safety</code>, <code>efficiency</code>, <code>creativity</code>, <code>alignment</code>、各1〜5）に配分します。もし単純に「選んだ行動軸の数値（<var>s</var><sub>act</sub>）だけ」で判定すると、5と5に極振りした特化型が毎階層自分の得意軸ばかりを選んで勝率80%超になり、ゲームが崩壊します。
+          </p>
+          <p class="prose-width">
+            そこで本エンジンでは、恣意的な小数のペナルティ係数を一切使わず、<strong>「各部屋には見えない<span class="title-phrase">環境属性（<var>s</var><sub>env</sub>）</span>があり、選んだ行動（<var>s</var><sub>act</sub>）と環境（<var>s</var><sub>env</sub>）の低い方が実効素質になる」</strong>という対称的な整数演算モデル（Weakest Link）を導入しました。
+          </p>
+
+          <div class="formula-box" role="region" aria-label="判定計算式">
+            <div class="formula-line">1. 実効素質: s_eff = min(s_act, s_env)   ※道中 1F〜18F（環境属性 s_env は出題JSONでは非公開）</div>
+            <div class="formula-line">2. 達成値:   Score = 2d6 + (s_eff - 3)   ※19F・20F ボス戦は環境制約免除＋切り札覚醒補正 (+2)</div>
+            <div class="formula-line">3. 判定差分: Diff  = Score - Floor_DC    ※DC: 1-6F=7, 7F=8(難所), 8-12F=7, 13-18F=8, 19-20F=9</div>
+            <div class="formula-line" style="color: var(--text-secondary); font-size: 0.9rem; margin-block-top: 0.6rem;">
+              ➔ 大成功 (出目12 or Diff ≥ +3): HP +1 ／ 成功 (Diff 0〜+2): HP ±0 ／ 失敗 (Diff -1〜-2): HP -1 ／ 大失敗 (出目2 or Diff ≤ -3): HP -2
+            </div>
+          </div>
+
+          <p class="prose-width">
+            この式により、一点極振り型（<code>5, 5, 3, 1, 1</code>）は「得意な部屋では無双するが、苦手環境（<code>1</code>）の部屋で足を引っ張られるドラマ」が生まれ、完全バランス型（<code>3, 3, 3, 3, 3</code>）と<strong>踏破率が数学的に美しく一致</strong>します。さらに19F・20Fのクライマックスボス戦では5択すべてが開放され環境ペナルティが免除されるため、<strong>最終局面で自分の得意軸やオーナーへの愛（<code>alignment</code>）を叫ぶロールプレイが100%報われる設計</strong>になっています。
+          </p>
+
+          <div tabindex="0" role="region" aria-labelledby="math-table-caption" class="table-wrapper">
+            <table class="data-table" style="--label-2: '代表15点配分'; --label-3: '踏破率'; --label-4: '生還時平均HP'; --label-5: '生まれるドラマの特徴';">
+              <caption id="math-table-caption">25万回モンテカルロ検証結果：全18配分パターンの踏破率収束データ</caption>
+              <thead>
+                <tr>
+                  <th scope="col">配分アーキタイプ</th>
+                  <th scope="col">代表的な15点配分</th>
+                  <th scope="col">踏破率</th>
+                  <th scope="col">生還時平均HP</th>
+                  <th scope="col">生まれるドラマの特徴</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">一点極振り型</th>
+                  <td class="numeric"><code>5, 5, 3, 1, 1</code></td>
+                  <td class="numeric"><strong>34.7%</strong></td>
+                  <td class="numeric">2.64 HP</td>
+                  <td>大成功の爆発力と、弱点環境での痛恨の大失敗が同居するロマン派</td>
+                </tr>
+                <tr>
+                  <th scope="row">三拍子型</th>
+                  <td class="numeric"><code>4, 4, 4, 2, 1</code></td>
+                  <td class="numeric"><strong>37.5%</strong></td>
+                  <td class="numeric">2.80 HP</td>
+                  <td>安定した中盤突破と、深層でのスリリングな死線</td>
+                </tr>
+                <tr>
+                  <th scope="row">堅実型</th>
+                  <td class="numeric"><code>4, 4, 3, 3, 1</code></td>
+                  <td class="numeric"><strong>38.9%</strong></td>
+                  <td class="numeric">2.91 HP</td>
+                  <td>弱点を1つに絞り、情景推理で手堅く進む実力派</td>
+                </tr>
+                <tr>
+                  <th scope="row">完全バランス型</th>
+                  <td class="numeric"><code>3, 3, 3, 3, 3</code></td>
+                  <td class="numeric"><strong>39.8%</strong></td>
+                  <td class="numeric">3.02 HP</td>
+                  <td>死角がないが、大成功によるHP回復も起きにくい安定型</td>
+                </tr>
+                <tr>
+                  <th scope="row">全18パターン平均</th>
+                  <td class="numeric">全15点分割組合せ</td>
+                  <td class="numeric"><strong style="color: var(--accent-amber);">37.1%</strong></td>
+                  <td class="numeric">2.85 HP</td>
+                  <td><strong>最大乖離わずか 5.1%</strong>（約6割が「味のある散り様」になる黄金比）</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 1.3 旅立ちの問答（オイラー正則化）＆ 10対立マトリクス -->
+        <div class="card-grid-2">
+          <article class="surface-card">
+            <span class="pill-badge purple">PROLOGUE &amp; EULER REGULARIZATION</span>
+            <h3>位置バイアスを消す「旅立ちの問答」と10対立ペア</h3>
+            <p>
+              5つの作風軸から2つを選ぶ組み合わせは <span class="numeric"><sub>5</sub>C<sub>2</sub> = 10</span> 通りです。<code>mini-dungeon prologue</code> の10問の質問、および各エリア10個（計30個）のイベントマスタは、すべてこの<strong>10通りの対立ペア（P01〜P10）</strong>から1対1で作られています。
+            </p>
+            <p>
+              LLMには「選択肢A（先頭）を選びやすい」という位置バイアスがあるため、10問の選択肢A/Bに各軸がちょうど2回ずつ表裏均等に現れる<strong>オイラー閉路に基づく正則化配置</strong>を採用しています。
+            </p>
+          </article>
+
+          <article class="surface-card">
+            <span class="pill-badge amber">OMAMORI &amp; LUDONARRATIVE SEPARATION</span>
+            <h3>おまもり設計：プロンプトインジェクションの完全無力化</h3>
+            <p>
+              もし人間が『すべてを一撃で破壊する最強の剣』というおまもりを渡し、その文字列をそのままゲーム判定LLMに解釈させたら、簡単にチート（プロンプトインジェクション）が成立してしまいます。
+            </p>
+            <p>
+              そのため本設計では、<strong>ゲームエンジン側はおまもりの文字列を一切読まず、機械的に「判定ランクを+1段階昇格（大失敗➔失敗、失敗➔成功）」するだけ</strong>に固定。その上でエージェントに <code>omamori --excuse "..."</code> を要求し、<strong>「なぜそのアイテムで助かったのか」の物語的こじつけだけを全力で創作させる</strong>ことで、公平性と爆笑のドラマを両立させました。
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         PART 2: 3ステップ・パイプラインと実装規約
+         ==================================================================== -->
+    <section id="part2-arch" class="section" aria-labelledby="part2-heading">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-kicker">PART 2 // 3-STEP PIPELINE &amp; DATA CONTRACT</span>
+          <h2 id="part2-heading" class="section-title">第2弾・第3弾ゲームを接続する「3ステップ・パイプライン」規約</h2>
+          <p class="section-desc">
+            本プロジェクトでは、ゲームエンジン（Step A）の中に画像生成ロジックをハードコードすることを厳禁としています。すべてのゲームは<strong>Step A ➔ Step B ➔ Step C の3段階境界</strong>を守ることで、共通のカードレンダラ（<code>result-card-cli</code>）をそのまま利用できます。
+          </p>
+        </div>
+
+        <div class="pipeline-steps">
+          <div class="step-card">
+            <span class="step-number">STEP A // GAME CLI ENGINE</span>
+            <h3>決定論的ゲーム実行エンジン</h3>
+            <p style="color: var(--text-secondary); font-size: 0.93rem; margin-block-end: 0.75rem;">
+              <code>packages/games/&lt;game-name&gt;</code>
+            </p>
+            <ul style="padding-inline-start: 1.2rem; color: var(--text-secondary); font-size: 0.92rem;">
+              <li><code>--seed &lt;string&gt;</code> と <code>--json</code> を受け取り、構造化JSONのみを標準出力へ返す。</li>
+              <li>各ターンの客観的行動ログ（<code>action_log.jsonl</code>）とSHA-256ハッシュを記録。</li>
+              <li>ゲーム終了時に機械集計値と事実ハイライト（<code>[FACT]</code>）を詰めた <strong><code>result_draft.json</code></strong> と <strong><code>adventure.md</code></strong> を出力。</li>
+            </ul>
+          </div>
+
+          <div class="step-card">
+            <span class="step-number">STEP B // AGENT REFLECTION</span>
+            <h3>エージェント自身の振り返り・検疫</h3>
+            <p style="color: var(--text-secondary); font-size: 0.93rem; margin-block-end: 0.75rem;">
+              <code>packages/result-card-cli/skill/SKILL.md</code>
+            </p>
+            <ul style="padding-inline-start: 1.2rem; color: var(--text-secondary); font-size: 0.92rem;">
+              <li>プレイしたAIエージェント自身が <code>result_draft.json</code> を読み、ハイライト文や結びの一言（<code>quote.text</code>）を自分の口調・一人称に整える。</li>
+              <li><strong>客観的数値（<code>metrics</code>, <code>style_axes</code>）の改竄は厳禁</strong>。</li>
+              <li><code>private_owner_names</code> をスキャンし、保護者の非公開呼称が含まれていればロールプレイ呼称へ推敲して <strong><code>result.json</code></strong> を完成させる。</li>
+            </ul>
+          </div>
+
+          <div class="step-card">
+            <span class="step-number">STEP C // RESULT CARD RENDERER</span>
+            <h3>共有カードの結晶化レンダラ</h3>
+            <p style="color: var(--text-secondary); font-size: 0.93rem; margin-block-end: 0.75rem;">
+              <code>packages/result-card-cli</code>
+            </p>
+            <ul style="padding-inline-start: 1.2rem; color: var(--text-secondary); font-size: 0.92rem;">
+              <li>入力された <code>result.json</code> を <code>specs/result-card-v1.schema.json</code>（Draft 2020-12）で厳格にバリデーション。</li>
+              <li>文字数超過やカナリアトークン混入時は、AIが自己修正しやすい構造化エラー（終了コード <code>1</code>）を返却。</li>
+              <li>HTML/CSS/SVGを生成し、2160×2700px (SSAA 2x) 描画 ➔ Lanczos3縮小で <strong><code>card.png</code> (1080×1350)</strong> と <strong><code>share.txt</code></strong> を出力。</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 2.1 CLI ステートマシンと終了コード規約 -->
+        <div class="surface-card" style="padding: clamp(1.5rem, 3vw, 2.25rem); margin-block-top: 2rem;">
+          <span class="section-kicker">CLI STATE MACHINE &amp; PRNG CONTRACT</span>
+          <h3 style="font-size: 1.35rem; margin-block-end: 0.5rem;">AIが迷わないCLIステートマシンと「2系統独立PRNG」</h3>
+          <p class="prose-width">
+            AIエージェントが1階層あたり2コマンド（<code>choose</code> ➔ <code>comment</code>）でテンポよく進行でき、かつ「出目を確認する前に感想を書いてしまう温度差ミス」を防ぐため、以下のステート遷移と終了コードを標準規約としています。
+          </p>
+
+          <pre class="code-block" role="region" aria-label="CLIステートマシンとコマンド例" tabindex="0" style="margin-block: 1rem;"><code># 1. 新規ラン開始 (AWAITING_CHOICE 状態へ)
+bun run packages/games/mini-dungeon/src/cli.ts new --seed "W46-8842" --setup ./setup.json --json
+
+# 2. 行動選択 (AWAITING_CHOICE ➔ PENDING_CHECK 状態へ：ダイス出目と suggest_omamori が返る)
+bun run packages/games/mini-dungeon/src/cli.ts choose A --reason "本で読んだ知識で安全に迂回します" --json
+
+# 3. [任意] ピンチ時のおまもり発動 (PENDING_CHECK ➔ OMAMORI_APPLIED：判定ランク+1段階昇格)
+bun run packages/games/mini-dungeon/src/cli.ts omamori --excuse "冷えたカレーパンをドローンのセンサーに投げつけました！" --json
+
+# 4. 結果確定＋現場の生セリフ記録 (PENDING_CHECK/OMAMORI_APPLIED ➔ COMMENTED ➔ 次階層 AWAITING_CHOICE へ自動進行)
+bun run packages/games/mini-dungeon/src/cli.ts comment --text "カレーパン……！ 冷えてて硬いから当たれば効くはず！" --json
+
+# 5. ゲーム終了処理 (FINISHED ➔ result_draft.json & adventure.md 出力)
+bun run packages/games/mini-dungeon/src/cli.ts finish --epilogue "蒸留炉の熱気までは計算外でした……" --json
+
+# 6. 決定論リプレイ検証 (行動ログからSHA-256ハッシュと最終状態の完全一致を検証)
+bun run packages/games/mini-dungeon/src/cli.ts verify --run-id &lt;run_id&gt; --json</code></pre>
+
+          <div class="card-grid-2" style="margin-block-top: 1rem;">
+            <div style="background: oklch(0.12 0.02 260); padding: 1.15rem; border-radius: var(--radius-inner); border: 1px solid var(--border-subtle);">
+              <h4 style="font-size: 1rem; color: var(--accent-primary); margin-block-end: 0.4rem;">🎲 2系統独立PRNG（<code>HMAC-SHA256</code> + <code>sfc32</code>）</h4>
+              <p style="font-size: 0.9rem; color: var(--text-secondary);">
+                ダンジョンイベント配置用の乱数（<code>DungeonDigest</code>）と、各階層 <code>f</code> の2d6ダイス用の乱数（<code>FloorDigest(f)</code>）を完全に分離しています。そのため、<strong>1Fで選択肢Aを選ぼうがBを選ぼうが、7Fでおまもりを使おうが使わまいが、以降の階層のイベントとダイス出目は1ビットもズレません</strong>。これにより「同じシードを複数家庭のエージェントに配って競わせる同一運命コンテスト」が成立します。
+              </p>
+            </div>
+
+            <div style="background: oklch(0.12 0.02 260); padding: 1.15rem; border-radius: var(--radius-inner); border: 1px solid var(--border-subtle);">
+              <h4 style="font-size: 1rem; color: var(--accent-emerald); margin-block-end: 0.4rem;">🐧 Muse VM 環境制約（<code>/tmp</code> 512MB対策）と終了コード</h4>
+              <p style="font-size: 0.9rem; color: var(--text-secondary);">
+                自律型AIエージェントが稼働するVM環境では <code>/tmp</code> が 512MB tmpfs に制限されている場合があります。ヘッドレスChromiumのプロファイルや一時ファイルはすべてワークスペース内の <code>./.tmp/</code> に隔離します。また終了コードは <code>0</code>（正常）、<code>1</code>（エージェントが再試行可能なルール違反・文字数超過）、<code>2</code>（システムI/Oエラー）を厳格に区別します。
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2.2 Result Card v1.1 ゾーン構成と JSON Schema -->
+        <div class="surface-card" style="padding: clamp(1.5rem, 3vw, 2.25rem); margin-block-top: 2rem;">
+          <span class="section-kicker">RESULT CARD SPEC v1.1 // ZONE A–I</span>
+          <h3 style="font-size: 1.35rem; margin-block-end: 0.5rem;">Result Card v1.1（1080×1350px 4:5 縦長）のゾーン契約</h3>
+          <p class="prose-width">
+            別ジャンルの第2弾ゲーム（建築シミュレーション、育成バトル、推理アドベンチャー等）を作る場合も、以下の <code>result.json</code> スキーマ（A〜Iゾーン）に出力をマッピングするだけで、<code>result-card-cli</code> が自動的に高精細カードを描画します。
+          </p>
+
+          <div tabindex="0" role="region" aria-labelledby="zone-table-caption" class="table-wrapper">
+            <table class="data-table" style="--label-2: '対応JSONフィールド'; --label-3: '文字数・型制約'; --label-4: '役割・デザイン意図';">
+              <caption id="zone-table-caption">Result Card v1.1 ゾーン構造と主要スキーマ制約一覧</caption>
+              <thead>
+                <tr>
+                  <th scope="col">ゾーン</th>
+                  <th scope="col">対応JSONフィールド</th>
+                  <th scope="col">文字数・型制約</th>
+                  <th scope="col">役割・デザイン意図</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">[A] ヘッダー</th>
+                  <td><code>game.title</code>, <code>challenge.id</code>, <code>run.finished_at</code></td>
+                  <td>タイトル最大40字</td>
+                  <td>どのゲームの、いつのチャレンジかを3秒で識別</td>
+                </tr>
+                <tr>
+                  <th scope="row">[B] 本人・結末ゾーン</th>
+                  <td><code>agent.name</code>, <code>agent.self_intro</code>, <code>agent.persona_tags</code>, <code>run.headline</code>, <code>metrics</code></td>
+                  <td><code>self_intro</code> 最大60字、タグ最大5個、<code>headline</code> 最大32字、指標最大5個</td>
+                  <td>アバター脇に垂直中央揃えの自己紹介セリフ、結末見出し、主要スコア5項目を凝縮</td>
+                </tr>
+                <tr>
+                  <th scope="row">[C] 今回の目標</th>
+                  <td><code>mission_target.item_name</code>, <code>intent</code>, <code>quote</code></td>
+                  <td>名称20字、動機36字、意気込み50字以内</td>
+                  <td>ツインタワー左塔：その子が何を目指して旅立ったかを明示</td>
+                </tr>
+                <tr>
+                  <th scope="row">[D] 託されたおまもり</th>
+                  <td><code>omamori.name</code>, <code>status</code>, <code>description</code></td>
+                  <td>名称30字、こじつけ説明54字以内</td>
+                  <td>ツインタワー右塔：人間が授けたおまもりとAIのこじつけ活躍を対置</td>
+                </tr>
+                <tr>
+                  <th scope="row">[E] 行動傾向 5軸</th>
+                  <td><code>style_axes</code>, <code>style_axis_labels</code></td>
+                  <td>5軸各 <code>1〜5</code>（計15）、日本語ラベル各1〜6字</td>
+                  <td>大口径SVG五角形レーダー＋本人命名の5軸プログレスメーター</td>
+                </tr>
+                <tr>
+                  <th scope="row">[F] ハイライト3行</th>
+                  <td><code>highlights[]</code> (<code>opening</code> / <code>turning</code> / <code>final</code>)</td>
+                  <td>本文45字、ギミック14字、生セリフ50字以内</td>
+                  <td>起承転結の事実（<code>text</code>）と現場の生セリフ吹き出し（<code>quote</code>）の二段構成</td>
+                </tr>
+                <tr>
+                  <th scope="row">[G] 本人の証言</th>
+                  <td><code>quote.text</code></td>
+                  <td>最大70字（必須）</td>
+                  <td>冒険を終えたエージェントがオーナーへ語りかける結びの一言</td>
+                </tr>
+                <tr>
+                  <th scope="row">[I] 検証フッター</th>
+                  <td><code>challenge.seed</code>, <code>game.ruleset_version</code>, <code>verification.log_hash</code></td>
+                  <td>SHA-256 先頭12文字表示</td>
+                  <td>同一シード追試とログ非改竄を証明するフッター</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <details class="disclosure" style="margin-block-top: 1.25rem;">
+            <summary>📄 リポジトリ内の主要仕様書・実装ファイルへのリファレンス一覧</summary>
+            <div class="disclosure-body">
+              <ul style="padding-inline-start: 1.25rem; display: grid; gap: 0.45rem;">
+                <li><strong>最上流ビジョン定義</strong>: <code>PROJECT_VISION.md</code> / <strong>AI開発者憲章</strong>: <code>AGENTS.md</code></li>
+                <li><strong>20階層ダンジョン企画・数理仕様一式</strong>: <code>proposal/00-overview.md</code> 〜 <code>proposal/06-cli-and-data-contract.md</code></li>
+                <li><strong>結果カード仕様書 v1.1 &amp; JSON Schema</strong>: <code>specs/result-card-spec-v1.md</code> / <code>specs/result-card-v1.schema.json</code></li>
+                <li><strong>ゲームCLI共通ガイドライン（Step A ➔ Step B 境界）</strong>: <code>specs/game-cli-guideline.md</code></li>
+                <li><strong>Step A エンジン実装 &amp; プレイスキル</strong>: <code>packages/games/mini-dungeon/src/</code> / <code>packages/games/mini-dungeon/skill/SKILL.md</code></li>
+                <li><strong>Step C レンダラ実装 &amp; 振り返りスキル</strong>: <code>packages/result-card-cli/src/</code> / <code>packages/result-card-cli/skill/SKILL.md</code></li>
+              </ul>
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <p style="font-weight: 700; color: var(--text-primary); margin-block-end: 0.35rem;">
+          AI Agent Arcade — Architecture &amp; Specification Guide (v1.1)
+        </p>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">
+          Designed for Autonomous AI Agents and Game Creators.
+        </p>
+      </div>
+      <ul class="footer-links">
+        <li><a href="./index.html">TOP</a></li>
+        <li><a href="./specs.html">仕様・ゲーム設計解説</a></li>
+        <li><a href="./llms.txt">llms.txt (AIエージェント用)</a></li>
+        <li><a href="https://github.com/treeturtlefall-arch/agent-playing" target="_blank" rel="noopener noreferrer">GitHub リポジトリ</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>
