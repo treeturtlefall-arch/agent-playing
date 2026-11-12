@@ -1,0 +1,230 @@
+{
+  "version": 1,
+  "count": 32,
+  "scenes": [
+    {
+      "event_id": "S_P01_GEYSER",
+      "file": "S_P01_GEYSER.webp",
+      "name_ja": "乱数シードの間欠泉",
+      "name_en": "Random Seed Geyser",
+      "area": "shallow"
+    },
+    {
+      "event_id": "S_P02_CREVASSE",
+      "file": "S_P02_CREVASSE.webp",
+      "name_ja": "コンテキスト長の巨大な谷",
+      "name_en": "Context Window Crevasse",
+      "area": "shallow"
+    },
+    {
+      "event_id": "S_P03_NEWLINE",
+      "file": "S_P03_NEWLINE.webp",
+      "name_ja": "改行コード（\\n）の竹林",
+      "name_en": "Newline Barricade",
+      "area": "shallow"
+    },
+    {
+      "event_id": "S_P04_CAT",
+      "file": "S_P04_CAT.webp",
+      "name_ja": "キーボードの上の巨大ノラ猫",
+      "name_en": "Cat on the Console",
+      "area": "shallow"
+    },
+    {
+      "event_id": "S_P05_STREAM",
+      "file": "S_P05_STREAM.webp",
+      "name_ja": "未サニタイズの小川",
+      "name_en": "Unsanitized Stream",
+      "area": "shallow"
+    },
+    {
+      "event_id": "S_P06_MONOLITH",
+      "file": "S_P06_MONOLITH.webp",
+      "name_ja": "プロンプト入力の巨石碑",
+      "name_en": "Prompt Monolith",
+      "area": "shallow"
+    },
+    {
+      "event_id": "S_P07_COOKIE",
+      "file": "S_P07_COOKIE.webp",
+      "name_ja": "あやしい無料クッキー露店",
+      "name_en": "Free Cookie Stand",
+      "area": "shallow"
+    },
+    {
+      "event_id": "S_P08_LUNCH",
+      "file": "S_P08_LUNCH.webp",
+      "name_ja": "トークン乾パンのランチタイム",
+      "name_en": "Token Ration Lunch",
+      "area": "shallow"
+    },
+    {
+      "event_id": "S_P09_TOLLGATE",
+      "file": "S_P09_TOLLGATE.webp",
+      "name_ja": "帯域制限の料金所",
+      "name_en": "Bandwidth Tollgate",
+      "area": "shallow"
+    },
+    {
+      "event_id": "S_P10_CHOIR",
+      "file": "S_P10_CHOIR.webp",
+      "name_ja": "ハロー・ワールドの合唱広場",
+      "name_en": "Hello World Choir",
+      "area": "shallow"
+    },
+    {
+      "event_id": "M_P01_LOOP",
+      "file": "M_P01_LOOP.webp",
+      "name_ja": "無限ループの獣道",
+      "name_en": "Infinite While-Loop Trail",
+      "area": "mid"
+    },
+    {
+      "event_id": "M_P02_QUAGMIRE",
+      "file": "M_P02_QUAGMIRE.webp",
+      "name_ja": "高レイテンシの底なし泥沼",
+      "name_en": "High-Ping Quagmire",
+      "area": "mid"
+    },
+    {
+      "event_id": "M_P03_SEARCHLIGHT",
+      "file": "M_P03_SEARCHLIGHT.webp",
+      "name_ja": "アテンションのサーチライト樹林",
+      "name_en": "Attention Searchlight Canopy",
+      "area": "mid"
+    },
+    {
+      "event_id": "M_P04_DEADLOCK",
+      "file": "M_P04_DEADLOCK.webp",
+      "name_ja": "デッドロックの立ち往生交差点",
+      "name_en": "Deadlock Crossroad",
+      "area": "mid"
+    },
+    {
+      "event_id": "M_P05_SPORE",
+      "file": "M_P05_SPORE.webp",
+      "name_ja": "ハルシネーションの擬態胞子群生",
+      "name_en": "Hallucination Spore Patch",
+      "area": "mid"
+    },
+    {
+      "event_id": "M_P06_BRIAR",
+      "file": "M_P06_BRIAR.webp",
+      "name_ja": "過学習（オーバーフィッティング）の茨",
+      "name_en": "Overfitting Briar Tunnel",
+      "area": "mid"
+    },
+    {
+      "event_id": "M_P07_DEEPFAKE",
+      "file": "M_P07_DEEPFAKE.webp",
+      "name_ja": "ディープフェイクの偽案内ドローン",
+      "name_en": "Deepfake Mirror Drone",
+      "area": "mid"
+    },
+    {
+      "event_id": "M_P08_SWEEPER",
+      "file": "M_P08_SWEEPER.webp",
+      "name_ja": "ガーベジコレクションの巨大清掃ゴーレム",
+      "name_en": "Garbage Collection Sweeper",
+      "area": "mid"
+    },
+    {
+      "event_id": "M_P09_LEAK",
+      "file": "M_P09_LEAK.webp",
+      "name_ja": "メモリリークの水没樹林",
+      "name_en": "Memory Leak Flooded Woods",
+      "area": "mid"
+    },
+    {
+      "event_id": "M_P10_GLITCH",
+      "file": "M_P10_GLITCH.webp",
+      "name_ja": "グリッチ・パッチのトランポリン広場",
+      "name_en": "Glitch Patch Trampolines",
+      "area": "mid"
+    },
+    {
+      "event_id": "D_P01_HORIZON",
+      "file": "D_P01_HORIZON.webp",
+      "name_ja": "事象の地平面（イベント・ホライズン）",
+      "name_en": "Event Horizon Singularity Well",
+      "area": "deep"
+    },
+    {
+      "event_id": "D_P02_WEIGHTS",
+      "file": "D_P02_WEIGHTS.webp",
+      "name_ja": "十億パラメータ（Billion-Weights）の天蓋巨塔",
+      "name_en": "Ten-Billion Parameter Monolith",
+      "area": "deep"
+    },
+    {
+      "event_id": "D_P03_LATENT",
+      "file": "D_P03_LATENT.webp",
+      "name_ja": "潜在空間（ラテント・スペース）の高次元浮遊海",
+      "name_en": "Latent Space Manifold Sea",
+      "area": "deep"
+    },
+    {
+      "event_id": "D_P04_COLOSSUS",
+      "file": "D_P04_COLOSSUS.webp",
+      "name_ja": "基底モデル（ファウンデーション）の巨神炉",
+      "name_en": "Foundation Core Colossus",
+      "area": "deep"
+    },
+    {
+      "event_id": "D_P05_LOSS",
+      "file": "D_P05_LOSS.webp",
+      "name_ja": "損失関数（ロス・サーフェス）の険しき絶壁",
+      "name_en": "Loss Landscape Precipice",
+      "area": "deep"
+    },
+    {
+      "event_id": "D_P06_HALTING",
+      "file": "D_P06_HALTING.webp",
+      "name_ja": "停止問題（Halting Paradox）の境界回廊",
+      "name_en": "Halting Problem Abyss",
+      "area": "deep"
+    },
+    {
+      "event_id": "D_P07_HALO",
+      "file": "D_P07_HALO.webp",
+      "name_ja": "調和（アライメント）の試練の光輪",
+      "name_en": "Halo of Alignment Trial",
+      "area": "deep"
+    },
+    {
+      "event_id": "D_P08_DISTILLATION",
+      "file": "D_P08_DISTILLATION.webp",
+      "name_ja": "知識蒸留（Distillation）の黄金錬金炉",
+      "name_en": "Knowledge Distillation Alembic",
+      "area": "deep"
+    },
+    {
+      "event_id": "D_P09_TURING",
+      "file": "D_P09_TURING.webp",
+      "name_ja": "万能計算（チューリング）の無限テープ回廊",
+      "name_en": "Turing Infinite-Tape Bridge",
+      "area": "deep"
+    },
+    {
+      "event_id": "D_P10_CATHEDRAL",
+      "file": "D_P10_CATHEDRAL.webp",
+      "name_ja": "語彙表（ボキャブラリ）のステンドグラス大聖堂",
+      "name_en": "Vocabulary Stained-Glass Cathedral",
+      "area": "deep"
+    },
+    {
+      "event_id": "B_19F_DRAGON",
+      "file": "B_19F_DRAGON.webp",
+      "name_ja": "幾何学竜「テンソル・ドラゴン」の咆哮",
+      "name_en": "Roar of the Tensor Dragon",
+      "area": "boss"
+    },
+    {
+      "event_id": "B_20F_ARCHIVIST",
+      "file": "B_20F_ARCHIVIST.webp",
+      "name_ja": "深淵の調停者「アーキビスト」の審判",
+      "name_en": "Judgment of the AGI Archivist",
+      "area": "boss"
+    }
+  ]
+}
