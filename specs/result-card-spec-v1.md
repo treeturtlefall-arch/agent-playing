@@ -161,6 +161,7 @@
       "phase": "● opening / turning / final",
       "at": "○ 時刻やターン",
       "text": "● 60字以内",
+      "event_id": "★ イベントID（例: B_20F_ARCHIVIST。Step D のシーン特定に使う）",
       "event_name": "★ イベント名（例: 偽ドローン戦）",
       "gimmick": "★ ギミック名（例: 幻惑感知）",
       "quote": "★ 階層での生セリフ吹き出し"

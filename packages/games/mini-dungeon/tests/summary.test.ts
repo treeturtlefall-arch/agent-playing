@@ -494,7 +494,10 @@ describe('Summary & Validator', () => {
     expect(draft.run.boss).toBeDefined();
     expect(draft.run.boss?.code).toBe('B_20F_ARCHIVIST');
     expect(draft.run.boss?.name).toContain('アーキビスト');
+    expect(draft.run.boss?.name).not.toContain('最終試練');
     expect(draft.run.boss?.sub).toBe('最終試練 (踏破)');
+    // ハイライトには Step D のシーン特定用に event_id が載ること
+    expect(draft.highlights.map((h) => h.event_id)).toEqual(['E_1', 'B_19F_DRAGON', 'B_20F_ARCHIVIST']);
   });
 
   it('20Fで力尽きた場合、boss はアーキビスト表記で sub が「終焉の地」になること', () => {

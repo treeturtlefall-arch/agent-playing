@@ -318,6 +318,7 @@ export function extractHighlights(logs: readonly ActionLogEntry[]): HighlightDra
     phase: 'opening',
     at: '1F',
     text: openingText.slice(0, 80),
+    event_id: firstLog.event_id,
     event_name: firstEventTitle,
     gimmick: getEventGimmick(firstLog.event_id),
     quote: firstLog.comment ? firstLog.comment.slice(0, 80) : undefined,
@@ -339,6 +340,7 @@ export function extractHighlights(logs: readonly ActionLogEntry[]): HighlightDra
     phase: 'final',
     at: `${lastLog.floor}F`,
     text: finalText.slice(0, 80),
+    event_id: lastLog.event_id,
     event_name: lastEventTitle,
     gimmick: getEventGimmick(lastLog.event_id),
     quote: lastLog.comment ? lastLog.comment.slice(0, 80) : undefined,
@@ -410,6 +412,7 @@ export function extractHighlights(logs: readonly ActionLogEntry[]): HighlightDra
     phase: 'turning',
     at: `${turningLog.floor}F`,
     text: turningText.slice(0, 80),
+    event_id: turningLog.event_id,
     event_name: turningEventTitle,
     gimmick: getEventGimmick(turningLog.event_id),
     quote: turningLog.comment ? turningLog.comment.slice(0, 80) : undefined,
@@ -536,7 +539,7 @@ export function createDraftResult(options: CreateDraftResultOptions): DraftResul
   const bossInfo =
     floorReached >= 20
       ? {
-          name: '[最終試練] 深淵の調停者「アーキビスト」',
+          name: '深淵の調停者「アーキビスト」',
           sub: outcome === 'clear' ? '最終試練 (踏破)' : '終焉の地',
           code: 'B_20F_ARCHIVIST',
         }

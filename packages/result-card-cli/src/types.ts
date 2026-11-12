@@ -35,6 +35,7 @@ export interface HighlightItem {
   phase: HighlightPhase;
   at?: string | null;
   text: string;
+  event_id?: string;
   event_name?: string;
   gimmick?: string;
   quote?: string;
