@@ -568,7 +568,12 @@ export function createDraftResult(options: CreateDraftResultOptions): DraftResul
       self_intro: setup.self_intro ?? null,
       persona_tags: setup.persona_tags ?? ['冒険者'],
       owner_display_name: setup.owner_display_name ?? null,
-      private_owner_names: setup.private_owner_names ?? null,
+      // 検疫ブラックリスト自体は共有成果物（result_draft.json / result.json）に
+      // 同梱しない。平文のリストが成果物と一緒に公開されると、守るはずの
+      // 本名・私的呼称そのものが漏洩するため、リストは setup.json（ローカル）
+      // にのみ保持する。検疫は finish 時スキャン（setup から直接読む）と、
+      // レンダラが result.json と同じディレクトリの setup.json を読み取って行う。
+      private_owner_names: null,
     },
     run: {
       finished_at: finishedAtIso,

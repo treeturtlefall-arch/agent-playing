@@ -92,6 +92,26 @@ describe('Privacy Leak Quarantine System', () => {
     expect(result.leaks).toHaveLength(0);
   });
 
+  it('checkPrivacyLeaks: result.json にリストがなくても extraNames（setup.json 由来）で検出できること', () => {
+    const card = createBaseCard();
+    card.agent.private_owner_names = null; // 新形式: result.json にはリストを同梱しない
+    card.quote.text = 'ケンジ、次はもっと頑張るから見ててよね！';
+    const without = checkPrivacyLeaks(card);
+    expect(without.hasLeak).toBe(false); // リスト供給なしでは検知できない
+    const withExtra = checkPrivacyLeaks(card, ['ケンジ']);
+    expect(withExtra.hasLeak).toBe(true);
+    expect(withExtra.leaks[0]?.keyword).toBe('ケンジ');
+  });
+
+  it('validateResultCard: extraPrivateNames を渡すとプライバシー違反として検証が落ちること', () => {
+    const card = createBaseCard();
+    card.agent.private_owner_names = null;
+    card.quote.text = 'ケンジのおかげです';
+    const result = validateResultCard(card, ['ケンジ']);
+    expect(result.valid).toBe(false);
+    expect(result.privacy?.hasLeak).toBe(true);
+  });
+
   it('checkPrivacyLeaks: quote に私的呼称が含まれる場合に検出し提案文を返すこと', () => {
     const card = createBaseCard();
     card.quote.text = 'ケンジ、次はもっと頑張るから見ててよね！';

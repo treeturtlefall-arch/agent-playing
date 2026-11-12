@@ -61,6 +61,6 @@
 
 ### プライバシー保護と検疫
 - `setup.json` で `private_owner_names`（非公開オーナー名配列）が指定されている場合、`finish` 時に `adventure.md` やドラフト内への混入を自動スキャンし、警告を出力する。
-- リザルトカードレンダラ（`result-card render`）は、`private_owner_names` の混入を検知した場合にレンダリングをブロックし、ロールプレイ呼称への推敲を促す。
+- リザルトカードレンダラ（`result-card render`）は、`private_owner_names` の混入を検知した場合にレンダリングをブロックし、ロールプレイ呼称への推敲を促す。検疫リストは `result.json` には同梱せず、レンダラが `result.json` と同じディレクトリの `setup.json` から読み取る（旧形式の `result.json` 内リストも互換のため引き続き判定対象）。
 8. `mini-dungeon verify --run-dir <D> --json` : ログリプレイと `log_hash` 検証
 

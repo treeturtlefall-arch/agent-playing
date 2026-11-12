@@ -40,6 +40,21 @@ describe('Summary & Validator', () => {
     },
   };
 
+  it('createDraftResult は検疫リストをドラフトに同梱しないこと（setup にあっても null になる）', () => {
+    const setup = validateSetup({ ...validSetupJson, private_owner_names: ['ケンジ'] }).data!;
+    expect(setup.private_owner_names).toEqual(['ケンジ']); // setup 側には保持される
+    const draft = createDraftResult({
+      setup,
+      seed: 'TEST-SEED',
+      logs: [],
+      omamoriName: null,
+      rulesetVersion: '1.0.0',
+      finishedAtIso: '2026-11-12T00:00:00.000Z',
+    });
+    expect(draft.agent.private_owner_names).toBeNull(); // 成果物には出さない
+    expect(JSON.stringify(draft)).not.toContain('ケンジ');
+  });
+
   it('validateSetup が正常な setup.json を正しく検証・正規化すること', () => {
     const res = validateSetup(validSetupJson);
     expect(res.success).toBe(true);

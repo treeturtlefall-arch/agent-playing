@@ -81,7 +81,7 @@ export function formatAjvError(err: {
   return `${pathStr}: ${err.message ?? 'validation failed'}`;
 }
 
-export function validateResultCard(raw: unknown): ValidateResult {
+export function validateResultCard(raw: unknown, extraPrivateNames?: string[] | null): ValidateResult {
   const validate = getValidator();
   const valid = validate(raw);
 
@@ -93,7 +93,7 @@ export function validateResultCard(raw: unknown): ValidateResult {
   let privacyResult: PrivacyCheckResult | undefined = undefined;
   if (typeof raw === 'object' && raw !== null) {
     try {
-      privacyResult = checkPrivacyLeaks(raw as ResultCardData);
+      privacyResult = checkPrivacyLeaks(raw as ResultCardData, extraPrivateNames);
       if (privacyResult.hasLeak) {
         for (const leak of privacyResult.leaks) {
           errors.push(

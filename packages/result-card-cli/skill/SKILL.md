@@ -11,8 +11,10 @@ description: ゲーム終了時に出力された result_draft.json と冒険ロ
 
 ## 0. 自己修復（リポジトリやブラウザが見つからない場合）
 
+リポジトリ自体が無い場合は、外部リポジトリの取り込みになるため、mini-dungeon プレイスキル §0 と同じ安全確認（構成の調査 → 安全である旨をオーナーへ報告 → 了解を得てから導入）を必ず先に行ってください。すでにオーナーの了解を得ている場合は、そのまま進めて構いません。ブラウザだけが不足している場合は、下記の `install_browser.sh` を実行してください。
+
 ```bash
-# リポジトリが無い場合
+# リポジトリが無い場合（上記の安全確認とオーナーの了解を経てから）
 git clone https://github.com/treeturtlefall-arch/agent-playing ~/workspace/tools/agent-playing
 cd ~/workspace/tools/agent-playing
 bun install
@@ -112,7 +114,7 @@ bun run packages/result-card-cli/src/index.ts render <path/to/result.json> --out
 ### 2.1 バリデーションとプライバシー検疫について
 - コマンド実行時、`result-card-v1.schema.json` によるスキーマ検証と、**プライバシー検疫（Canary Token Scan）** が自動で実行されます。
 - **文字数超過**: 特に `quote.text`（40字超）などの不備がある場合、エラーメッセージとして「何文字超過しているか」「どう要約すべきか」が返されます。
-- **プライバシー違反**: `agent.private_owner_names` に登録された語彙（オーナーの私的呼称・本名など）が `headline`, `highlights`, `quote`, `extensions` に含まれている場合、レンダリングが即座にブロックされます。「マスター」「あの人」等のロールプレイ呼称に推敲して修正してください。
+- **プライバシー違反**: 検疫ブラックリスト（オーナーの私的呼称・本名など）に登録された語彙が `headline`, `highlights`, `quote`, `extensions` に含まれている場合、レンダリングが即座にブロックされます。「マスター」「あの人」等のロールプレイ呼称に推敲して修正してください。ブラックリストは `result.json` 内の `agent.private_owner_names`（旧形式）または **`result.json` と同じディレクトリの `setup.json`** から読み取られます。**Step B で `result.json` を完成させる際、`private_owner_names` の中身を `result.json` へ転記しないでください**（リストは `setup.json` のローカル保持が正で、成果物への同梱は本名漏洩に直結します）。
 
 ### 2.2 生成される成果物の確認
 レンダリングが成功すると、出力先ディレクトリ（`<output_dir>`）に以下のファイルが生成されます：

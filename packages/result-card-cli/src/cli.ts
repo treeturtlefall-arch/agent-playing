@@ -7,6 +7,29 @@ import { renderCardHtml } from './template.js';
 import type { RenderResult, ResultCardData } from './types.js';
 import { validateResultCard } from './validate.js';
 
+/**
+ * result.json と同じディレクトリにある setup.json（ローカル保持）から
+ * 検疫ブラックリスト（private_owner_names）を読み取る。
+ * 新形式では result.json 自体にリストを同梱しないため、レンダラはこの
+ * サイドカーから検疫リストを補う。setup.json が無い・読めない場合は
+ * 空リスト（従来動作: result.json 内のリストのみで判定）を返す。
+ */
+export function loadLocalPrivateNames(resultAbsPath: string): string[] {
+  try {
+    const setupPath = path.join(path.dirname(resultAbsPath), 'setup.json');
+    if (!fs.existsSync(setupPath)) return [];
+    const setup = JSON.parse(fs.readFileSync(setupPath, 'utf8')) as {
+      private_owner_names?: unknown;
+      agent?: { private_owner_names?: unknown };
+    };
+    const raw = setup.private_owner_names ?? setup.agent?.private_owner_names;
+    if (!Array.isArray(raw)) return [];
+    return raw.filter((n): n is string => typeof n === 'string' && n.trim().length > 0);
+  } catch {
+    return [];
+  }
+}
+
 export interface ParsedArgs {
   command: string | null;
   positional: string[];
@@ -99,7 +122,7 @@ async function handleValidate(
     return 2;
   }
 
-  const validation = validateResultCard(rawData);
+  const validation = validateResultCard(rawData, loadLocalPrivateNames(absPath));
 
   if (validation.valid) {
     printOutput({ ok: true, valid: true, file: absPath }, isJson, () => {
@@ -143,7 +166,7 @@ async function handleRender(
   }
 
   // 1. スキーマ＆プライバシーバリデーション
-  const validation = validateResultCard(rawData);
+  const validation = validateResultCard(rawData, loadLocalPrivateNames(absPath));
   const force = Boolean(options['force']);
 
   if (!validation.valid) {

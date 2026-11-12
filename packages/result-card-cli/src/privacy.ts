@@ -46,9 +46,15 @@ export function scanTextForKeywords(
 /**
  * ResultCardData 内の各フィールドを走査し、private_owner_names に登録された
  * 私的呼称・本名が混入していないか検疫（Canary Token Scan）を行う。
+ *
+ * ブラックリストの供給源は2つ（和集合で判定する）:
+ * 1. card.agent.private_owner_names — 旧形式の result.json 互換用。
+ * 2. extraNames — result.json と同じディレクトリの setup.json（ローカル保持）
+ *    から CLI が読み取って渡すリスト。新形式では result.json にリスト自体を
+ *    同梱しないため、こちらが主経路になる。
  */
-export function checkPrivacyLeaks(card: ResultCardData): PrivacyCheckResult {
-  const blacklist = (card.agent.private_owner_names ?? [])
+export function checkPrivacyLeaks(card: ResultCardData, extraNames?: string[] | null): PrivacyCheckResult {
+  const blacklist = [...(card.agent.private_owner_names ?? []), ...(extraNames ?? [])]
     .filter((k): k is string => typeof k === 'string' && k.trim().length > 0)
     .map((k) => k.trim());
 
