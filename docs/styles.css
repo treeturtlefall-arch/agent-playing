@@ -745,6 +745,29 @@ button:active {
 }
 
 /* ==========================================================================
+   Demo Video (ヒーロー直下のプレイログ・リプレイ)
+   ========================================================================== */
+.demo-video-section {
+  padding-block: clamp(1.75rem, 4vw, 2.75rem);
+  border-block-end: 1px solid var(--border-subtle);
+}
+
+.demo-video {
+  max-inline-size: 960px;
+  margin-inline: auto;
+}
+
+.demo-video video {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  background: #07090d;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-outer);
+  box-shadow: var(--shadow-elevated);
+}
+
+/* ==========================================================================
    AI Crawler & Agent Quick-Invite Banner
    ========================================================================== */
 .agent-beacon {
