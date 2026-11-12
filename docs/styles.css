@@ -899,15 +899,29 @@ button:active {
   background: #070a12;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-inner);
-  padding: 1.25rem 1.5rem;
-  max-block-size: 460px;
+  padding: 1.1rem 1.25rem;
+  max-block-size: 360px;
   max-inline-size: 100%;
   overflow-x: auto;
   overflow-y: auto;
   scrollbar-gutter: stable;
   font-family: var(--font-sans);
+  font-size: 0.9rem;
+  line-height: 1.75;
+}
+
+.chronicle-disclosure {
+  margin-block: 0;
+  background: oklch(0.14 0.025 260 / 0.85);
+}
+
+.chronicle-disclosure summary {
+  padding: 0.85rem 1.1rem;
   font-size: 0.92rem;
-  line-height: 1.8;
+}
+
+.chronicle-disclosure .disclosure-body {
+  padding: 0.85rem 1rem 1rem;
 }
 
 .chronicle-content h3 {
@@ -1131,23 +1145,30 @@ pre.code-block.code-block-wrap {
    ========================================================================== */
 .tabs-container {
   margin-block-top: 1.5rem;
+  min-inline-size: 0;
+  max-inline-size: 100%;
 }
 
 .tablist-scroller {
   display: flex;
+  flex-wrap: nowrap;
   overflow-x: auto;
-  gap: 0.5rem;
+  scroll-snap-type: inline proximity;
+  gap: 0.45rem;
   border-block-end: 1px solid var(--border-subtle);
   padding-block-end: 0;
   scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  max-inline-size: 100%;
 }
 
 [role="tab"] {
   position: relative;
   flex: none;
+  scroll-snap-align: start;
   display: inline-flex;
   align-items: safe center;
-  gap: 0.65rem;
+  gap: 0.6rem;
   min-block-size: 48px;
   padding: 0.65rem 1.25rem;
   background: transparent;
@@ -1157,6 +1178,7 @@ pre.code-block.code-block-wrap {
   font-size: 0.96rem;
   font-weight: 700;
   font-feature-settings: "palt" 1, "kern" 1;
+  white-space: nowrap;
   cursor: pointer;
   transition-property: color, background-color;
   transition-duration: 150ms;
@@ -1182,16 +1204,62 @@ pre.code-block.code-block-wrap {
 }
 
 .tablist-scroller [role="tab"] {
-  justify-content: center;
-  padding: 0.55rem 0.9rem;
+  justify-content: flex-start;
+  padding: 0.55rem 0.95rem;
+  text-align: start;
 }
 
 .tab-avatar {
-  inline-size: 44px;
-  block-size: 44px;
+  inline-size: 40px;
+  block-size: 40px;
   border-radius: 50%;
   object-fit: cover;
+  flex-shrink: 0;
   transition: opacity 150ms;
+}
+
+.tab-label-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.25;
+  gap: 0.12rem;
+}
+
+.tab-char-name {
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: inherit;
+}
+
+.tab-char-meta {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+[role="tab"][aria-selected="true"] .tab-char-meta {
+  color: var(--text-secondary);
+}
+
+@media (max-width: 600px) {
+  .tablist-scroller {
+    gap: 0.2rem;
+  }
+  .tablist-scroller [role="tab"] {
+    padding: 0.45rem 0.5rem;
+    gap: 0.35rem;
+  }
+  .tab-avatar {
+    inline-size: 26px;
+    block-size: 26px;
+  }
+  .tab-char-name {
+    font-size: 0.8rem;
+  }
+  .tab-char-meta {
+    font-size: 0.65rem;
+  }
 }
 
 .tablist-scroller [role="tab"]:not([aria-selected="true"]) .tab-avatar {
