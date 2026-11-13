@@ -226,6 +226,7 @@ export interface HighlightItem {
   phase: 'opening' | 'turning' | 'final';
   at?: string | null;
   text: string;
+  event_id?: string;
   event_name?: string;
   gimmick?: string;
   quote?: string;

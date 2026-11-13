@@ -319,6 +319,7 @@ export function extractHighlights(logs: readonly ActionLogEntry[]): HighlightDra
     phase: 'opening',
     at: '1F',
     text: openingText.slice(0, 80),
+    event_id: firstLog.event_id,
     event_name: firstEventTitle,
     gimmick: getEventGimmick(firstLog.event_id),
     quote: firstLog.comment ? firstLog.comment.slice(0, 80) : undefined,
@@ -340,6 +341,7 @@ export function extractHighlights(logs: readonly ActionLogEntry[]): HighlightDra
     phase: 'final',
     at: `${lastLog.floor}F`,
     text: finalText.slice(0, 80),
+    event_id: lastLog.event_id,
     event_name: lastEventTitle,
     gimmick: getEventGimmick(lastLog.event_id),
     quote: lastLog.comment ? lastLog.comment.slice(0, 80) : undefined,
@@ -420,6 +422,7 @@ export function extractHighlights(logs: readonly ActionLogEntry[]): HighlightDra
     phase: 'turning',
     at: `${turningLog.floor}F`,
     text: turningText.slice(0, 80),
+    event_id: turningLog.event_id,
     event_name: turningEventTitle,
     gimmick: getEventGimmick(turningLog.event_id),
     quote: turningLog.comment ? turningLog.comment.slice(0, 80) : undefined,
@@ -551,18 +554,22 @@ export function createDraftResult(options: CreateDraftResultOptions): DraftResul
     description: truncateSentence(omamoriDesc, 80),
   };
 
-  // 19F 竜戦の最終判定。クリアでも判定が失敗・大失敗なら竜を討ち取ったのではなく
-  // 生還・通過しただけなので、「完全撃破」とは表記しない（事実との整合のため）。
-  const dragonLog = logs.find((l) => l.floor === 19);
-  const dragonSurvivedOnly =
-    dragonLog !== undefined && (dragonLog.final_rank === 'failure' || dragonLog.final_rank === 'fumble');
-
+  // boss バーの表記は「最後に相対した存在」に合わせる。
+  // 20F の最終試練は竜ではなくアーキビスト（B_20F_ARCHIVIST）であり、討伐対象では
+  // ないため、クリア時は「最終試練 (踏破)」と表記する。19F で終わった場合は竜のみ。
+  // （クリアは 20F 到達が条件のため、19F 止まりで outcome が clear になることはない）
   const bossInfo =
-    floorReached >= 19
+    floorReached >= 20
       ? {
-          name: floorReached === 20 ? '[最深部ボス] 幾何学竜 テンソル・ドラゴン' : '[深層] 幾何学竜 テンソル・ドラゴン',
-          sub: outcome === 'clear' ? (dragonSurvivedOnly ? '討伐ボス (生還突破)' : '討伐ボス (完全撃破)') : '終焉の地',
-          code: floorReached === 20 ? 'B_20F_CLEAR' : 'B_19F_DRAGON',
+          name: '深淵の調停者「アーキビスト」',
+          sub: outcome === 'clear' ? '最終試練 (踏破)' : '終焉の地',
+          code: 'B_20F_ARCHIVIST',
+        }
+      : floorReached === 19
+      ? {
+          name: '[深層] 幾何学竜 テンソル・ドラゴン',
+          sub: '終焉の地',
+          code: 'B_19F_DRAGON',
         }
       : causeOfDeath
       ? { name: `[深層] ${getEventTitle(causeOfDeath)}`, sub: '終焉の地', code: causeOfDeath }

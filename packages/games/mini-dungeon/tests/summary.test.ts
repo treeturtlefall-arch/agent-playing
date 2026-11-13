@@ -492,12 +492,15 @@ describe('Summary & Validator', () => {
     expect(draft.schema_version).toBe('1.1');
     expect(draft.run.outcome).toBe('clear');
     expect(draft.run.boss).toBeDefined();
-    expect(draft.run.boss?.code).toBe('B_20F_CLEAR');
-    expect(draft.run.boss?.name).toContain('幾何学竜 テンソル・ドラゴン');
-    expect(draft.run.boss?.sub).toBe('討伐ボス (完全撃破)');
+    expect(draft.run.boss?.code).toBe('B_20F_ARCHIVIST');
+    expect(draft.run.boss?.name).toContain('アーキビスト');
+    expect(draft.run.boss?.name).not.toContain('最終試練');
+    expect(draft.run.boss?.sub).toBe('最終試練 (踏破)');
+    // ハイライトには Step D のシーン特定用に event_id が載ること
+    expect(draft.highlights.map((h) => h.event_id)).toEqual(['E_1', 'B_19F_DRAGON', 'B_20F_ARCHIVIST']);
   });
 
-  it('クリアでも19F竜戦の判定が失敗なら boss sub は「生還突破」になること（完全撃破と誤記しない）', () => {
+  it('20Fで力尽きた場合、boss はアーキビスト表記で sub が「終焉の地」になること', () => {
     const setup = validateSetup(validSetupJson).data!;
     const mockLogs: ActionLogEntry[] = Array.from({ length: 20 }, (_, i) => ({
       floor: i + 1,
@@ -514,25 +517,67 @@ describe('Summary & Validator', () => {
       skill_mod: 2,
       total_score: 10,
       diff: 2,
-      raw_rank: i === 18 ? 'failure' : 'success',
+      raw_rank: i === 19 ? 'fumble' : 'success',
       omamori_used: false,
       omamori_excuse: null,
-      final_rank: i === 18 ? 'failure' : 'success',
+      final_rank: i === 19 ? 'fumble' : 'success',
       hp_before: 10,
-      hp_delta: i === 18 ? -1 : 0,
-      hp_after: 10,
+      hp_delta: i === 19 ? -2 : 0,
+      hp_after: i === 19 ? 0 : 10,
       comment: `Floor ${i + 1}`,
     }));
 
     const draft = createDraftResult({
-      seed: 'TEST-BOSS-CLEAR-SURVIVED',
+      seed: 'TEST-BOSS-20F-DEATH',
       setup,
       omamoriName: '冷えたカレーパン',
       logs: mockLogs,
     });
 
-    expect(draft.run.outcome).toBe('clear');
-    expect(draft.run.boss?.sub).toBe('討伐ボス (生還突破)');
+    expect(draft.run.outcome).toBe('gameover');
+    expect(draft.run.boss?.code).toBe('B_20F_ARCHIVIST');
+    expect(draft.run.boss?.name).toContain('アーキビスト');
+    expect(draft.run.boss?.sub).toBe('終焉の地');
+  });
+
+  it('19Fで力尽きた場合、boss はテンソル・ドラゴン表記で sub が「終焉の地」になること', () => {
+    const setup = validateSetup(validSetupJson).data!;
+    const mockLogs: ActionLogEntry[] = Array.from({ length: 19 }, (_, i) => ({
+      floor: i + 1,
+      area: i < 6 ? 'shallow' : i < 14 ? 'mid' : i < 18 ? 'deep' : 'boss',
+      event_id: i === 18 ? 'B_19F_DRAGON' : `E_${i + 1}`,
+      dc: 8,
+      s_env: 'safety',
+      choice: 'A',
+      choice_axis: 'safety',
+      s_act: 5,
+      s_eff: 5,
+      dice: [4, 4],
+      dice_total: 8,
+      skill_mod: 2,
+      total_score: 10,
+      diff: 2,
+      raw_rank: i === 18 ? 'fumble' : 'success',
+      omamori_used: false,
+      omamori_excuse: null,
+      final_rank: i === 18 ? 'fumble' : 'success',
+      hp_before: 10,
+      hp_delta: i === 18 ? -2 : 0,
+      hp_after: i === 18 ? 0 : 10,
+      comment: `Floor ${i + 1}`,
+    }));
+
+    const draft = createDraftResult({
+      seed: 'TEST-BOSS-19F-DEATH',
+      setup,
+      omamoriName: '冷えたカレーパン',
+      logs: mockLogs,
+    });
+
+    expect(draft.run.outcome).toBe('gameover');
+    expect(draft.run.boss?.code).toBe('B_19F_DRAGON');
+    expect(draft.run.boss?.name).toContain('幾何学竜 テンソル・ドラゴン');
+    expect(draft.run.boss?.sub).toBe('終焉の地');
   });
 
   it('おまもり説明が80字を超える場合、文の途中で切断されないこと', () => {

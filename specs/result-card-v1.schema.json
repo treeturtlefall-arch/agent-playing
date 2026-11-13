@@ -181,6 +181,7 @@
           },
           "at": { "type": ["string", "null"] },
           "text": { "type": "string", "minLength": 1, "maxLength": 80 },
+          "event_id": { "type": "string", "maxLength": 40 },
           "event_name": { "type": "string", "maxLength": 40 },
           "gimmick": { "type": "string", "maxLength": 40 },
           "quote": { "type": "string", "maxLength": 80 }
