@@ -2,7 +2,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { captureScreenshot, findChromiumPath, getLastScreenshotError, getLastScreenshotPath } from './browser.js';
-import { exportGuestAgent, type GuestMetaInput } from './export-guest.js';
+import {
+  exportGuestAgent,
+  type GuestMetaInput,
+  uploadGuestToHub,
+  type UploadGuestResult,
+} from './export-guest.js';
 import { generateShareText } from './share.js';
 import { renderCardHtml } from './template.js';
 import type { RenderResult, ResultCardData } from './types.js';
@@ -37,7 +42,7 @@ export interface ParsedArgs {
   options: Record<string, string | boolean>;
 }
 
-const BOOLEAN_FLAGS = new Set(['json', 'help', 'html-only', 'force']);
+const BOOLEAN_FLAGS = new Set(['json', 'help', 'html-only', 'force', 'upload']);
 
 export function parseCliArgs(args: string[]): ParsedArgs {
   let command: string | null = null;
@@ -324,7 +329,7 @@ async function handleExportGuest(
     outPath: typeof options['out'] === 'string' ? options['out'] : undefined,
   });
 
-  if (!res.ok) {
+  if (!res.ok || !res.guest) {
     printOutput({ ok: false, errors: res.errors }, isJson, () => {
       console.error(`❌ ゲストデータのエクスポートに失敗しました:`);
       for (const err of res.errors ?? []) {
@@ -334,6 +339,12 @@ async function handleExportGuest(
     return 1;
   }
 
+  let uploadResult: UploadGuestResult | undefined;
+  if (Boolean(options['upload'])) {
+    const hubUrl = typeof options['hub'] === 'string' ? options['hub'] : undefined;
+    uploadResult = await uploadGuestToHub(res.guest, { hubUrl });
+  }
+
   printOutput(
     {
       ok: true,
@@ -341,6 +352,7 @@ async function handleExportGuest(
       agent_id: res.agent_id,
       target_axis: res.target_axis,
       avatar_base64_length: res.avatar_base64_length,
+      ...(uploadResult ? { upload: uploadResult } : {}),
     },
     isJson,
     () => {
@@ -348,6 +360,15 @@ async function handleExportGuest(
       console.log(`📄 出力先: ${res.out_path}`);
       console.log(`🆔 ID: ${res.agent_id} | 得意軸: ${res.target_axis}`);
       console.log(`🖼️ 256px WebP Base64長: ${res.avatar_base64_length} chars`);
+      if (uploadResult) {
+        if (uploadResult.ok) {
+          const countInfo =
+            typeof uploadResult.count === 'number' ? `（現在 ${uploadResult.count} 人が登録中）` : '';
+          console.log(`☁️ ハブ登録完了: ${uploadResult.hub_url}${countInfo}`);
+        } else {
+          console.warn(`⚠️ ハブ登録に失敗しました（ローカルの guest.json は保存済みです）: ${uploadResult.error}`);
+        }
+      }
     }
   );
   return 0;
@@ -367,7 +388,7 @@ Result Card CLI (Step C Renderer v0.9)
 Usage:
   result-card render <path/to/result.json> [--out <dir>] [--html-only] [--json]
   result-card validate <path/to/result.json> [--json]
-  result-card export-guest <path/to/result.json> --meta <path/to/guest_meta.json> [--avatar <path>] [--out <path>] [--json]
+  result-card export-guest <path/to/result.json> --meta <path/to/guest_meta.json> [--avatar <path>] [--out <path>] [--upload] [--hub <url>] [--json]
       `);
     }
     return 0;

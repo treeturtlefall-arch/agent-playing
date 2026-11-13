@@ -124,10 +124,32 @@ export default {
       }
 
       const s = validation.summary;
+      const existing = await env.DB.prepare(
+        `SELECT exported_at FROM guests WHERE agent_id = ?`
+      )
+        .bind(s.agent_id)
+        .first<{ exported_at: string }>();
+
+      if (existing && existing.exported_at) {
+        const existingTs = Date.parse(existing.exported_at);
+        const incomingTs = Date.parse(s.exported_at);
+        if (!Number.isNaN(existingTs) && !Number.isNaN(incomingTs) && incomingTs < existingTs) {
+          return jsonResponse(
+            {
+              ok: false,
+              error: `Newer companion record already exists on the hub (${existing.exported_at} > ${s.exported_at}).`,
+              existing_exported_at: existing.exported_at,
+              incoming_exported_at: s.exported_at,
+            },
+            409
+          );
+        }
+      }
+
       await env.DB.prepare(
         `INSERT INTO guests (
-           agent_id, agent_name, title, target_axis, outcome, reached_floor, epitaph, avatar_base64, guest_json, updated_at
-         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+           agent_id, agent_name, title, target_axis, outcome, reached_floor, epitaph, avatar_base64, exported_at, guest_json, updated_at
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
          ON CONFLICT(agent_id) DO UPDATE SET
            agent_name = excluded.agent_name,
            title = excluded.title,
@@ -136,6 +158,7 @@ export default {
            reached_floor = excluded.reached_floor,
            epitaph = excluded.epitaph,
            avatar_base64 = excluded.avatar_base64,
+           exported_at = excluded.exported_at,
            guest_json = excluded.guest_json,
            updated_at = datetime('now')`
       )
@@ -148,9 +171,12 @@ export default {
           s.reached_floor,
           s.epitaph,
           s.avatar_base64,
+          s.exported_at,
           s.normalized_json
         )
         .run();
+
+      const countRow = await env.DB.prepare('SELECT COUNT(*) AS cnt FROM guests').first<{ cnt: number }>();
 
       return jsonResponse(
         {
@@ -160,6 +186,7 @@ export default {
           agent_name: s.agent_name,
           title: s.title,
           target_axis: s.target_axis,
+          count: countRow?.cnt ?? 1,
         },
         201
       );

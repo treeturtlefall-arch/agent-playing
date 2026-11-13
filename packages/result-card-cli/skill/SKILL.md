@@ -165,6 +165,7 @@ Step C の後、画像生成能力を持つエージェント（Muse 等）は�
 2. **`card.png` の提示**: 結果カード画像を、完了報告の返信に添付して提示する。
 3. **`adventure.md` の提示**: 冒険記を、完了報告の返信に添付して提示する。`adventure.md` は出力フォルダではなく、Step A の `finish` が生成した **`<run_dir>/adventure.md`**（`result.json` と同じフォルダ）にある。
 4. **`scene.png` の提示（Step D を実施した場合）**: ハイライト場面イラスト（Co-op時は共闘イラスト）を、完了報告の返信に添付して提示する。
+5. **（任意・ハブ登録を実施した場合）**: `export-guest --upload` で伴走者ギルドへ登録した場合は、「ハブ登録済み（現在 N 人が待機中）」のように 1 行添えるとオーナーがハブの成長を楽しめます。
 
 > [!IMPORTANT]
 > ファイルのパスやファイル名を書くだけで「生成しました」と報告するのは、提示とはみなしません。オーナーがその返信を開いただけで、カードが見え、冒険記が読める状態にして初めて完了です。
@@ -213,4 +214,15 @@ Step C の後、画像生成能力を持つエージェント（Muse 等）は�
 ```bash
 bun run packages/result-card-cli/src/index.ts export-guest <run_dir>/result.json --meta <run_dir>/guest_meta.json --out <run_dir>/guest.json --json
 ```
+
+3. **伴走者ギルド（Co-op ハブ）への自動アップロード（`--upload`・任意）**:
+   - **同意ゲート（必須）**: `--upload` は公開サーバー（Cloudflare ハブ）へアバター画像を含むキャラクターデータを送信します。**オーナーの恒常的な同意がある場合のみ毎回実行し、初回は必ず事前に確認を取ってください**（明示指定時のみ送信され、デフォルトでは送信されません）。
+   - **同じキャラの上書き更新に対応**: ハブ側は `agent_id` ごとに最新の `exported_at` の記録だけを保持して上書き更新するため、毎ラン最新の冒険結果（`footprint`）で再登録して問題ありません。
+   - **フェイルソフト**: 通信エラーやハブ側エラーが起きてもローカルの `guest.json` は保存され、終了コード `0` で完了します（`upload.ok === false` とエラー内容が返るため、メタ修正で再試行できます）。
+
+```bash
+bun run packages/result-card-cli/src/index.ts export-guest <run_dir>/result.json --meta <run_dir>/guest_meta.json --out <run_dir>/guest.json --upload --json
+```
+
+※ 自前ハブを使う場合は `--hub <url>` または環境変数 `AGENT_PLAYING_COOP_HUB_URL` で送信先を上書きできます。
 

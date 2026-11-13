@@ -220,11 +220,13 @@
     </section>
 
     <section class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
         <h2 style="margin:0; font-size:1.15rem;">待機中の伴走者たち</h2>
-        <span id="guestCount" style="font-size:0.85rem; color:var(--muted);">読み込み中...</span>
+        <span id="guestCount" style="font-size:0.95rem; font-weight:600; color:var(--ink);">読み込み中...</span>
       </div>
-      <div class="grid" id="guestGrid"></div>
+      <p class="note" style="margin-bottom:0;">
+        ※ 誰が伴走者として現れるかは、冒険が始まってからのお楽しみです。
+      </p>
     </section>
   </div>
 
@@ -248,7 +250,6 @@
     const uploadBtn = document.getElementById('uploadBtn');
     const clearBtn = document.getElementById('clearBtn');
     const statusBox = document.getElementById('statusBox');
-    const guestGrid = document.getElementById('guestGrid');
     const guestCount = document.getElementById('guestCount');
 
     let selectedJsonText = null;
@@ -333,68 +334,25 @@
         }
         showStatus('「' + body.agent_name + '」をギルドに登録しました！', true);
         resetSelection();
-        await loadGuests();
+        await loadGuestCount();
       } catch (err) {
         showStatus('登録に失敗しました: ' + err.message, false);
         uploadBtn.disabled = false;
       }
     });
 
-    async function loadGuests() {
+    async function loadGuestCount() {
       try {
-        const res = await fetch('/api/guests');
+        const res = await fetch('/api/health');
         const data = await res.json();
-        const list = data.guests || [];
-        guestCount.textContent = list.length + ' 人が待機中';
-        guestGrid.innerHTML = '';
-        if (list.length === 0) {
-          guestGrid.innerHTML = '<div style="grid-column: 1 / -1; color:var(--muted); font-size:0.9rem;">まだ登録された伴走者はいません。最初の一人を登録してみましょう！</div>';
-          return;
-        }
-        for (const g of list) {
-          const card = document.createElement('div');
-          card.className = 'guest-item';
-
-          const img = document.createElement('img');
-          img.className = 'avatar';
-          img.src = g.avatar_base64;
-          img.alt = g.agent_name;
-
-          const info = document.createElement('div');
-          info.style.minWidth = '0';
-          info.style.flex = '1';
-
-          const name = document.createElement('div');
-          name.className = 'guest-name';
-          name.textContent = g.agent_name;
-
-          const title = document.createElement('div');
-          title.className = 'guest-title';
-          title.textContent = g.title;
-
-          const badges = document.createElement('div');
-          const b1 = document.createElement('span');
-          b1.className = 'badge';
-          b1.textContent = AXIS_JA[g.target_axis] || g.target_axis;
-          const b2 = document.createElement('span');
-          b2.className = 'badge ' + (g.outcome === 'clear' ? 'clear' : 'gameover');
-          b2.textContent = g.outcome === 'clear' ? '20F 踏破' : g.reached_floor + 'F 到達';
-          badges.append(b1, b2);
-
-          const epi = document.createElement('div');
-          epi.className = 'guest-epitaph';
-          epi.textContent = g.epitaph;
-
-          info.append(name, title, badges, epi);
-          card.append(img, info);
-          guestGrid.append(card);
-        }
+        const count = typeof data.count === 'number' ? data.count : 0;
+        guestCount.textContent = count + ' 人が待機中';
       } catch {
         guestCount.textContent = '取得エラー';
       }
     }
 
-    loadGuests();
+    loadGuestCount();
   </script>
 </body>
 </html>

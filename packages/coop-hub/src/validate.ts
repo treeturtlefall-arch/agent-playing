@@ -75,6 +75,7 @@ export interface ValidatedGuestSummary {
   reached_floor: number;
   epitaph: string;
   avatar_base64: string;
+  exported_at: string;
   normalized_json: string;
 }
 
@@ -92,8 +93,11 @@ export function validateGuestPayload(raw: unknown): GuestValidationOutput {
   if (root.schema_version !== '1.0') {
     errors.push("schema_version must be '1.0'");
   }
+  let exportedAt = '';
   if (typeof root.exported_at !== 'string' || Number.isNaN(Date.parse(root.exported_at))) {
     errors.push('exported_at must be a valid ISO 8601 date-time string');
+  } else {
+    exportedAt = root.exported_at;
   }
 
   // agent
@@ -240,6 +244,7 @@ export function validateGuestPayload(raw: unknown): GuestValidationOutput {
       reached_floor: reachedFloor,
       epitaph,
       avatar_base64: avatarBase64,
+      exported_at: exportedAt,
       normalized_json: JSON.stringify(root),
     },
   };

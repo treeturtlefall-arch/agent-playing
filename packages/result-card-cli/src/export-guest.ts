@@ -1,7 +1,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import sharp from 'sharp';
-import { validateGuestAgent } from '../../games/mini-dungeon/src/guest.js';
+import {
+  COOP_API_ENV_VAR,
+  DEFAULT_COOP_API_URL,
+  type FetchLike,
+  validateGuestAgent,
+} from '../../games/mini-dungeon/src/guest.js';
 import type { GuestAgentData, StyleAxis } from '../../games/mini-dungeon/src/types.js';
 import type { ResultCardData, StyleAxes } from './types.js';
 
@@ -244,5 +249,142 @@ export async function exportGuestAgent(options: ExportGuestOptions): Promise<Exp
     target_axis: validation.data.gameplay.assist.target_axis,
     avatar_base64_length: validation.data.visuals.avatar_base64.length,
     guest: validation.data,
+  };
+}
+
+export const COOP_HUB_ENV_VAR = 'AGENT_PLAYING_COOP_HUB_URL';
+
+export function resolveCoopHubUrl(explicitHubUrl?: string): string | null {
+  if (explicitHubUrl && explicitHubUrl.trim().length > 0) {
+    return explicitHubUrl.trim();
+  }
+  const hubEnv = process.env[COOP_HUB_ENV_VAR];
+  if (hubEnv && hubEnv.trim().length > 0) {
+    return hubEnv.trim();
+  }
+  const legacyEnv = process.env[COOP_API_ENV_VAR];
+  if (legacyEnv && legacyEnv.trim().length > 0) {
+    return legacyEnv.trim();
+  }
+  return DEFAULT_COOP_API_URL;
+}
+
+export function buildUploadGuestUrl(baseUrl: string): string {
+  const url = new URL(baseUrl);
+  const normalizedPath = url.pathname.replace(/\/+$/, '');
+  if (!normalizedPath.endsWith('/api/guests')) {
+    url.pathname = `${normalizedPath}/api/guests`;
+  } else {
+    url.pathname = normalizedPath;
+  }
+  return url.toString();
+}
+
+export interface UploadGuestOptions {
+  hubUrl?: string;
+  timeoutMs?: number;
+  fetchFn?: FetchLike;
+}
+
+export interface UploadGuestResult {
+  ok: boolean;
+  agent_id: string;
+  hub_url: string | null;
+  status?: number;
+  count?: number;
+  error?: string;
+  retry_hint?: string;
+}
+
+/**
+ * 検証済みの guest.json を Co-op ハブ（Cloudflare Workers）へ送信する（フェイルソフト設計）
+ */
+export async function uploadGuestToHub(
+  guest: GuestAgentData,
+  options: UploadGuestOptions = {}
+): Promise<UploadGuestResult> {
+  const baseUrl = resolveCoopHubUrl(options.hubUrl);
+  if (!baseUrl) {
+    return {
+      ok: false,
+      agent_id: guest.agent.id,
+      hub_url: null,
+      error: `Co-op Hub URL is not configured (--hub or ${COOP_HUB_ENV_VAR}).`,
+      retry_hint: 'ローカルの guest.json は保存済みです。--hub <url> を指定して再実行してください。',
+    };
+  }
+
+  let targetUrl: string;
+  try {
+    targetUrl = buildUploadGuestUrl(baseUrl);
+  } catch (err) {
+    return {
+      ok: false,
+      agent_id: guest.agent.id,
+      hub_url: baseUrl,
+      error: `Invalid Hub URL '${baseUrl}': ${(err as Error).message}`,
+      retry_hint: '正しい http(s):// URL を --hub に指定して再実行してください。',
+    };
+  }
+
+  const fetchImpl = options.fetchFn ?? globalThis.fetch;
+  const timeoutMs = options.timeoutMs ?? 10000;
+
+  let res: Response;
+  try {
+    res = await fetchImpl(targetUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(guest),
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+  } catch (err) {
+    return {
+      ok: false,
+      agent_id: guest.agent.id,
+      hub_url: targetUrl,
+      error: `Network error while uploading to ${targetUrl}: ${(err as Error).message}`,
+      retry_hint: 'ローカルの guest.json は保存済みです。通信環境を確認後、再度 --upload または Web UI から登録できます。',
+    };
+  }
+
+  let body: Record<string, unknown> | null = null;
+  try {
+    const raw = await res.json();
+    if (typeof raw === 'object' && raw !== null && !Array.isArray(raw)) {
+      body = raw as Record<string, unknown>;
+    }
+  } catch {
+    // 非JSONレスポンスはそのままステータスで判定
+  }
+
+  if (!res.ok || (body && body.ok === false)) {
+    const baseErr =
+      body && typeof body.error === 'string'
+        ? body.error
+        : `HTTP ${res.status} (${res.statusText})`;
+    const details =
+      body && Array.isArray(body.details)
+        ? ` (${body.details.map(String).join(', ')})`
+        : '';
+    return {
+      ok: false,
+      agent_id: guest.agent.id,
+      hub_url: targetUrl,
+      status: res.status,
+      error: `${baseErr}${details}`,
+      retry_hint: 'ローカルの guest.json は保存済みです。内容を修正するか、Web UI から手動登録できます。',
+    };
+  }
+
+  return {
+    ok: true,
+    agent_id: guest.agent.id,
+    hub_url: targetUrl,
+    status: res.status,
+    ...(body && typeof body.count === 'number' ? { count: body.count } : {}),
   };
 }

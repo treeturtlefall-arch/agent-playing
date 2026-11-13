@@ -118,4 +118,52 @@ describe('Co-op Hub Worker API', () => {
     );
     expect(res.status).toBe(400);
   });
+
+  test('exported_at が既存より古い場合は 409 で巻き戻りを防ぎ、新しい場合は upsert されて count が返ること', async () => {
+    const env = createEnv();
+    const reina = loadSample('reina');
+    reina.exported_at = '2026-11-14T10:00:00.000Z';
+
+    const first = await worker.fetch(
+      new Request('https://hub.example/api/guests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(reina),
+      }),
+      env
+    );
+    expect(first.status).toBe(201);
+    const firstBody = (await first.json()) as { ok: boolean; count: number };
+    expect(firstBody.count).toBe(1);
+
+    // 古い exported_at は 409
+    const older = structuredClone(reina);
+    older.exported_at = '2026-11-13T10:00:00.000Z';
+    const stale = await worker.fetch(
+      new Request('https://hub.example/api/guests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(older),
+      }),
+      env
+    );
+    expect(stale.status).toBe(409);
+
+    // 新しい exported_at は上書き更新
+    const newer = structuredClone(reina);
+    newer.exported_at = '2026-11-14T12:00:00.000Z';
+    newer.footprint.reached_floor = 20;
+    newer.footprint.outcome = 'clear';
+    const updated = await worker.fetch(
+      new Request('https://hub.example/api/guests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newer),
+      }),
+      env
+    );
+    expect(updated.status).toBe(201);
+    const updatedBody = (await updated.json()) as { ok: boolean; count: number };
+    expect(updatedBody.count).toBe(1);
+  });
 });

@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { MAX_AVATAR_BASE64_LENGTH, validateGuestAgent } from '../../games/mini-dungeon/src/guest.js';
 import { runCli } from '../src/cli.js';
-import { exportGuestAgent, type GuestMetaInput } from '../src/export-guest.js';
+import { exportGuestAgent, type GuestMetaInput, uploadGuestToHub } from '../src/export-guest.js';
 
 const TEMP_DIR = path.resolve('./.tmp/test-export-guest');
 
@@ -108,6 +108,102 @@ describe('export-guest CLI & Helper', () => {
     ]);
 
     expect(exitCode).toBe(0);
+    expect(fs.existsSync(outPath)).toBe(true);
+  });
+
+  test('uploadGuestToHub が成功レスポンスの count を返し、失敗時はエラーを透過しつつ例外を投げないこと', async () => {
+    const outPath = path.join(TEMP_DIR, 'shiragane-ai-guest.json');
+    const res = await exportGuestAgent({
+      resultPath: path.resolve('examples/sample_ai_w46/result.json'),
+      meta: SAMPLE_META,
+      outPath,
+    });
+    expect(res.ok).toBe(true);
+    const guest = res.guest!;
+
+    const okUp = await uploadGuestToHub(guest, {
+      hubUrl: 'https://hub.example.workers.dev',
+      fetchFn: async () =>
+        new Response(JSON.stringify({ ok: true, count: 3 }), {
+          status: 201,
+          headers: { 'Content-Type': 'application/json' },
+        }),
+    });
+    expect(okUp.ok).toBe(true);
+    expect(okUp.count).toBe(3);
+    expect(okUp.hub_url).toBe('https://hub.example.workers.dev/api/guests');
+
+    const rejectedUp = await uploadGuestToHub(guest, {
+      hubUrl: 'https://hub.example.workers.dev',
+      fetchFn: async () =>
+        new Response(
+          JSON.stringify({ ok: false, error: 'Validation failed', details: ['bad title'] }),
+          { status: 400, headers: { 'Content-Type': 'application/json' } }
+        ),
+    });
+    expect(rejectedUp.ok).toBe(false);
+    expect(rejectedUp.status).toBe(400);
+    expect(rejectedUp.error).toContain('Validation failed');
+    expect(rejectedUp.error).toContain('bad title');
+  });
+
+  test('CLI export-guest --upload がハブ登録でき、失敗時もフェイルソフトで exitCode 0 になること', async () => {
+    fs.mkdirSync(TEMP_DIR, { recursive: true });
+    const metaPath = path.join(TEMP_DIR, 'meta.json');
+    const outPath = path.join(TEMP_DIR, 'guest.json');
+    fs.writeFileSync(metaPath, JSON.stringify(SAMPLE_META, null, 2), 'utf8');
+
+    const receivedIds: Array<string | null> = [];
+    const server = Bun.serve({
+      port: 0,
+      async fetch(req) {
+        const u = new URL(req.url);
+        if (u.pathname === '/api/guests' && req.method === 'POST') {
+          const body = (await req.json()) as { agent?: { id?: string } };
+          receivedIds.push(body.agent?.id ?? null);
+          return new Response(JSON.stringify({ ok: true, count: 1 }), {
+            status: 201,
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
+        return new Response('Not Found', { status: 404 });
+      },
+    });
+
+    try {
+      const okCode = await runCli([
+        'export-guest',
+        path.resolve('examples/sample_ai_w46/result.json'),
+        '--meta',
+        metaPath,
+        '--out',
+        outPath,
+        '--upload',
+        '--hub',
+        `http://127.0.0.1:${server.port}`,
+        '--json',
+      ]);
+      expect(okCode).toBe(0);
+      expect(receivedIds).toEqual(['shiragane-ai']);
+      expect(fs.existsSync(outPath)).toBe(true);
+    } finally {
+      server.stop();
+    }
+
+    // 失敗系: 不正なハブURLでも export 自体は成功し exitCode 0（フェイルソフト）
+    const failSoftCode = await runCli([
+      'export-guest',
+      path.resolve('examples/sample_ai_w46/result.json'),
+      '--meta',
+      metaPath,
+      '--out',
+      outPath,
+      '--upload',
+      '--hub',
+      'not-a-valid-url',
+      '--json',
+    ]);
+    expect(failSoftCode).toBe(0);
     expect(fs.existsSync(outPath)).toBe(true);
   });
 });

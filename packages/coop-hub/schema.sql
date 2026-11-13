@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS guests (
   reached_floor INTEGER NOT NULL,
   epitaph TEXT NOT NULL,
   avatar_base64 TEXT NOT NULL,
+  exported_at TEXT NOT NULL DEFAULT '',
   guest_json TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
