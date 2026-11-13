@@ -1196,7 +1196,7 @@ Mini-Dungeon CLI (Step A Engine v0.8)
 
 Usage:
   mini-dungeon prologue [--questions] [--submission <file>] [--out <file>] [--json]
-  mini-dungeon new --seed <str> --setup <file> [--omamori <file>] [--run-dir <dir>] [--json]
+  mini-dungeon new --seed <str> --setup <file> [--omamori <file>] [--guest <file>] [--run-dir <dir>] [--json]
   mini-dungeon status [--run-dir <dir>] [--json]
   mini-dungeon choose <A|B> [--run-dir <dir>] [--json]
   mini-dungeon omamori --excuse <str> [--run-dir <dir>] [--json]
