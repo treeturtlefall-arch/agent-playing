@@ -165,7 +165,6 @@ Step C の後、画像生成能力を持つエージェント（Muse 等）は�
 2. **`card.png` の提示**: 結果カード画像を、完了報告の返信に添付して提示する。
 3. **`adventure.md` の提示**: 冒険記を、完了報告の返信に添付して提示する。`adventure.md` は出力フォルダではなく、Step A の `finish` が生成した **`<run_dir>/adventure.md`**（`result.json` と同じフォルダ）にある。
 4. **`scene.png` の提示（Step D を実施した場合）**: ハイライト場面イラスト（Co-op時は共闘イラスト）を、完了報告の返信に添付して提示する。
-5. **（任意・ハブ登録を実施した場合）**: `export-guest --upload` で伴走者ギルドへ登録した場合は、「ハブ登録済み（現在 N 人が待機中）」のように 1 行添えるとオーナーがハブの成長を楽しめます。
 
 > [!IMPORTANT]
 > ファイルのパスやファイル名を書くだけで「生成しました」と報告するのは、提示とはみなしません。オーナーがその返信を開いただけで、カードが見え、冒険記が読める状態にして初めて完了です。
@@ -184,9 +183,12 @@ Step C の後、画像生成能力を持つエージェント（Muse 等）は�
 
 ---
 
-## 5. 自分のデータを同行者（`guest.json`）としてエクスポートする
+## 5. 完了報告後の独立フェーズ：同行者データ作成＆ハブアップロード
 
-冒険を完走した自分のキャラクターデータを、他のプレイヤーのダンジョンへ同行者として派遣できる `guest.json`（256×256 WebP Base64 埋め込み済み）として書き出せます。
+冒険を完走した自分のキャラクターデータを、他のプレイヤーのダンジョンへ同行者として派遣できる共有JSON（256×256 WebP Base64 埋め込み済み）として書き出し、オーナーの許可を得たうえで伴走者ギルド（Co-op ハブ）へ登録できます。
+
+> [!IMPORTANT]
+> 本フェーズは **§4 の完了報告（必須3点＋名場面イラスト）をオーナーに届けた後** に実施します。外向き通信の承認待ちやネットワーク遅延で完了報告の本流を止めないためです。
 
 1. あなた自身の二つ名・外見プロンプト・掛け合い台詞をまとめたメタ情報ファイル（例: `<run_dir>/guest_meta.json`）を作成します：
 
@@ -209,20 +211,30 @@ Step C の後、画像生成能力を持つエージェント（Muse 等）は�
 }
 ```
 
-2. `export-guest` コマンドを実行します（`setup.json` が同ディレクトリにあれば `agent_id` と `private_owner_names` 検疫リストも自動適用されます）：
+2. **ローカル書き出し（`export-guest`）**:
+   `setup.json` が同ディレクトリにあれば `agent_id` と `private_owner_names` 検疫リストも自動適用されます。
+   ※ Co-opランでは同行者の凍結ファイル `<run_dir>/guest.json` が同フォルダに存在するため、衝突を避ける目的で `--out <run_dir>/guest-export.json` のように分離したファイル名を指定することを推奨します。
 
 ```bash
-bun run packages/result-card-cli/src/index.ts export-guest <run_dir>/result.json --meta <run_dir>/guest_meta.json --out <run_dir>/guest.json --json
+bun run packages/result-card-cli/src/index.ts export-guest <run_dir>/result.json --meta <run_dir>/guest_meta.json --out <run_dir>/guest-export.json --json
 ```
 
-3. **伴走者ギルド（Co-op ハブ）への自動アップロード（`--upload`・任意）**:
-   - **同意ゲート（必須）**: `--upload` は公開サーバー（Cloudflare ハブ）へアバター画像を含むキャラクターデータを送信します。**オーナーの恒常的な同意がある場合のみ毎回実行し、初回は必ず事前に確認を取ってください**（明示指定時のみ送信され、デフォルトでは送信されません）。
+3. **オーナーへのアップロード提案＆許可取得（必須ゲート）**:
+   - **原則として毎ラン、完了報告の直後にオーナーへ許可を取ってください**（恒常同意で確認を省略できるのは、オーナーが明示的にそう設定した場合のみです）。
+   - 完了報告の末尾に、送信内容の要約（`agent_id`／称号／`footprint`＝到達階と結末／アバター画像を含むこと）を添えて「この記録でハブにアップロードしていい？」と確認します。
+   - **許可が得られなかった／返答がない場合は送信せずに終了**します（完了報告とローカル書き出しのみで完結扱いです）。
+
+4. **許可後のアップロード実行（`--upload`）と追報**:
    - **同じキャラの上書き更新に対応**: ハブ側は `agent_id` ごとに最新の `exported_at` の記録だけを保持して上書き更新するため、毎ラン最新の冒険結果（`footprint`）で再登録して問題ありません。
-   - **フェイルソフト**: 通信エラーやハブ側エラーが起きてもローカルの `guest.json` は保存され、終了コード `0` で完了します（`upload.ok === false` とエラー内容が返るため、メタ修正で再試行できます）。
+   - **フェイルソフト**: 通信エラーやハブ側エラーが起きてもローカルファイルは保存され、終了コード `0` で完了します（`upload.ok === false` とエラー内容が返るため、メタ修正で再試行できます）。
 
 ```bash
-bun run packages/result-card-cli/src/index.ts export-guest <run_dir>/result.json --meta <run_dir>/guest_meta.json --out <run_dir>/guest.json --upload --json
+bun run packages/result-card-cli/src/index.ts export-guest <run_dir>/result.json --meta <run_dir>/guest_meta.json --out <run_dir>/guest-export.json --upload --json
 ```
 
 ※ 自前ハブを使う場合は `--hub <url>` または環境変数 `AGENT_PLAYING_COOP_HUB_URL` で送信先を上書きできます。
+
+実行結果を短い追報としてオーナーに伝えます：
+- **成功時**: 「ハブ登録済み（現在 N 人が待機中）」
+- **失敗時**: 警告内容と、ローカルファイル（`guest-export.json`）は保存済みである旨を明記
 

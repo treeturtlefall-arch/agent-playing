@@ -121,8 +121,9 @@ describe('Co-op Hub Worker API', () => {
 
   test('exported_at が既存より古い場合は 409 で巻き戻りを防ぎ、新しい場合は upsert されて count が返ること', async () => {
     const env = createEnv();
+    const now = Date.now();
     const reina = loadSample('reina');
-    reina.exported_at = '2026-11-14T10:00:00.000Z';
+    reina.exported_at = new Date(now - 60 * 60 * 1000).toISOString();
 
     const first = await worker.fetch(
       new Request('https://hub.example/api/guests', {
@@ -138,7 +139,7 @@ describe('Co-op Hub Worker API', () => {
 
     // 古い exported_at は 409
     const older = structuredClone(reina);
-    older.exported_at = '2026-11-13T10:00:00.000Z';
+    older.exported_at = new Date(now - 2 * 60 * 60 * 1000).toISOString();
     const stale = await worker.fetch(
       new Request('https://hub.example/api/guests', {
         method: 'POST',
@@ -151,7 +152,7 @@ describe('Co-op Hub Worker API', () => {
 
     // 新しい exported_at は上書き更新
     const newer = structuredClone(reina);
-    newer.exported_at = '2026-11-14T12:00:00.000Z';
+    newer.exported_at = new Date(now - 10 * 60 * 1000).toISOString();
     newer.footprint.reached_floor = 20;
     newer.footprint.outcome = 'clear';
     const updated = await worker.fetch(
@@ -165,5 +166,18 @@ describe('Co-op Hub Worker API', () => {
     expect(updated.status).toBe(201);
     const updatedBody = (await updated.json()) as { ok: boolean; count: number };
     expect(updatedBody.count).toBe(1);
+
+    // 未来日時の exported_at は 400 で拒否
+    const future = structuredClone(reina);
+    future.exported_at = new Date(now + 60 * 60 * 1000).toISOString();
+    const futureRes = await worker.fetch(
+      new Request('https://hub.example/api/guests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(future),
+      }),
+      env
+    );
+    expect(futureRes.status).toBe(400);
   });
 });

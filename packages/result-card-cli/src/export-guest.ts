@@ -238,7 +238,25 @@ export async function exportGuestAgent(options: ExportGuestOptions): Promise<Exp
     };
   }
 
-  const outPath = path.resolve(options.outPath ?? path.join(baseDir, 'guest.json'));
+  const outPath = path.resolve(options.outPath ?? path.join(baseDir, 'guest-export.json'));
+  const frozenGuestPath = path.resolve(baseDir, 'guest.json');
+  const statePath = path.join(baseDir, 'state.json');
+  if (outPath === frozenGuestPath && fs.existsSync(statePath)) {
+    try {
+      const stateRaw = JSON.parse(fs.readFileSync(statePath, 'utf8')) as { guest_hash?: unknown };
+      if (typeof stateRaw.guest_hash === 'string' && stateRaw.guest_hash.length > 0) {
+        return {
+          ok: false,
+          errors: [
+            `Refusing to overwrite frozen Co-op companion file '${frozenGuestPath}' (used by verify). Use a separate output path such as 'guest-export.json'.`,
+          ],
+        };
+      }
+    } catch {
+      // state.json 読み取り失敗時はパス衝突チェックのみスキップ
+    }
+  }
+
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   fs.writeFileSync(outPath, JSON.stringify(validation.data, null, 2) + '\n', 'utf8');
 

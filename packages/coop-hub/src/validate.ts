@@ -94,8 +94,12 @@ export function validateGuestPayload(raw: unknown): GuestValidationOutput {
     errors.push("schema_version must be '1.0'");
   }
   let exportedAt = '';
-  if (typeof root.exported_at !== 'string' || Number.isNaN(Date.parse(root.exported_at))) {
+  const parsedExportedMs =
+    typeof root.exported_at === 'string' ? Date.parse(root.exported_at) : Number.NaN;
+  if (typeof root.exported_at !== 'string' || Number.isNaN(parsedExportedMs)) {
     errors.push('exported_at must be a valid ISO 8601 date-time string');
+  } else if (parsedExportedMs > Date.now() + 5 * 60 * 1000) {
+    errors.push('exported_at must not be in the future');
   } else {
     exportedAt = root.exported_at;
   }

@@ -17,6 +17,7 @@ import { getGuestPath, loadGuest, loadState } from '../src/storage.js';
 import type { GuestAgentData, SetupData } from '../src/types.js';
 import { verifyRun } from '../src/verify.js';
 import { validateResultCard } from '../../../result-card-cli/src/validate.js';
+import { exportGuestAgent } from '../../../result-card-cli/src/export-guest.js';
 
 const TEMP_RUN_DIR = path.resolve('./.tmp/test-coop-run');
 
@@ -258,6 +259,42 @@ describe('V2o Companion Assist & Deterministic Verify (検証⑤)', () => {
     expect(comp.agent_id).toBe('reina');
     expect(comp.assisted).toBe(true);
     expect(comp.guest_avatar_file).toBe('guest_avatar.webp');
+
+    // 4.6. Co-op ラン後に exportGuestAgent を実行しても、凍結 guest.json が上書きされず verify が通ること
+    const resultJsonPath = path.join(TEMP_RUN_DIR, 'result.json');
+    fs.writeFileSync(resultJsonPath, JSON.stringify(draftRaw, null, 2), 'utf8');
+    const avatarPngPath = path.resolve('examples/sample_ai_w46/ai_portrait.png');
+    const exportMeta = {
+      title: 'テスト冒険者',
+      personality: '仲間と協力して進む冒険者',
+      speech_style: '丁寧語',
+      appearance_prompt: '冒険者の姿',
+      highlight_poses: { on_assist: '仲間を導く姿' },
+      dialogues: {
+        on_join: 'よろしくお願いします！',
+        on_assist: '今が好機です！',
+        on_clear: 'やりましたね！',
+      },
+    };
+
+    // 凍結ファイル guest.json への直接上書きは拒否されること
+    const blockedExport = await exportGuestAgent({
+      resultPath: resultJsonPath,
+      meta: exportMeta,
+      avatarPath: avatarPngPath,
+      outPath: getGuestPath(TEMP_RUN_DIR),
+    });
+    expect(blockedExport.ok).toBe(false);
+
+    // デフォルト出力先（guest-export.json）なら成功し、その後の verify も valid のままであること
+    const safeExport = await exportGuestAgent({
+      resultPath: resultJsonPath,
+      meta: exportMeta,
+      avatarPath: avatarPngPath,
+    });
+    expect(safeExport.ok).toBe(true);
+    expect(path.basename(safeExport.out_path!)).toBe('guest-export.json');
+    expect(verifyRun({ runDir: TEMP_RUN_DIR }).valid).toBe(true);
 
     // 5. 凍結された guest.json の target_axis を改竄すると verify が失敗すること
     const tamperedGuest = loadGuest(TEMP_RUN_DIR)!;
