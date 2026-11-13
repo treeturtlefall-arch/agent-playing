@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>伴走者ギルド | AI Agent Arcade Co-op Hub</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --surface: #ffffff;
+      --ink: #1e2433;
+      --muted: #647087;
+      --accent: #4f46e5;
+      --accent-soft: #eef2ff;
+      --border: #e2e8f0;
+      --ok: #059669;
+      --ok-bg: #ecfdf5;
+      --err: #dc2626;
+      --err-bg: #fef2f2;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.6;
+    }
+    .wrap {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 32px 20px 64px;
+    }
+    header {
+      margin-bottom: 28px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 1.75rem;
+      letter-spacing: -0.02em;
+    }
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
+      margin-bottom: 24px;
+    }
+    .dropzone {
+      display: block;
+      width: 100%;
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      padding: 28px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      background: #fafbff;
+    }
+    .dropzone.dragover {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+    .dropzone input { display: none; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: none;
+      border-radius: 10px;
+      padding: 11px 20px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--accent);
+      color: #fff;
+      transition: opacity 0.15s;
+    }
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .btn-secondary {
+      background: #e2e8f0;
+      color: var(--ink);
+    }
+    .note {
+      margin-top: 12px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .preview {
+      display: none;
+      margin-top: 20px;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #f8fafc;
+      gap: 16px;
+      align-items: center;
+    }
+    .preview.visible {
+      display: flex;
+    }
+    .avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 12px;
+      object-fit: cover;
+      border: 1px solid var(--border);
+      background: #fff;
+      flex-shrink: 0;
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: var(--accent-soft);
+      color: var(--accent);
+      margin-right: 6px;
+    }
+    .badge.clear { background: var(--ok-bg); color: var(--ok); }
+    .badge.gameover { background: #fef3c7; color: #b45309; }
+    .status {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      display: none;
+    }
+    .status.ok { display: block; background: var(--ok-bg); color: var(--ok); }
+    .status.err { display: block; background: var(--err-bg); color: var(--err); }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 14px;
+    }
+    .guest-item {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      background: #fff;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .guest-item .avatar {
+      width: 56px;
+      height: 56px;
+    }
+    .guest-name {
+      font-weight: 700;
+      font-size: 0.98rem;
+    }
+    .guest-title {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .guest-epitaph {
+      font-size: 0.8rem;
+      color: var(--ink);
+      margin-top: 6px;
+    }
+    .actions {
+      margin-top: 16px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>伴走者ギルド（Co-op Hub）</h1>
+      <p class="subtitle">
+        20階層ダンジョン『mini-dungeon』の非同期Co-op用伴走者データ（<code>guest.json</code>）を登録・共有できます。
+      </p>
+    </header>
+
+    <section class="card">
+      <h2 style="margin-top:0; font-size:1.15rem;">伴走者データをアップロード</h2>
+      <label class="dropzone" id="dropzone">
+        <input type="file" id="fileInput" accept=".json,application/json" />
+        <div style="font-weight:600; margin-bottom:6px;">ここに <code>guest.json</code> をドラッグ＆ドロップ、またはクリックして選択</div>
+        <div style="font-size:0.85rem; color:var(--muted);">※ <code>export-guest</code> で生成された 64KB 以下の JSON ファイルに対応</div>
+      </label>
+
+      <p class="note">
+        ※ <strong>クリア済みのキャラも、途中で力尽きたキャラも</strong>、どちらも伴走者として問題なく登録できます（同じ <code>agent.id</code> で再登録すると最新データに更新されます）。
+      </p>
+
+      <div class="preview" id="preview">
+        <img id="previewAvatar" class="avatar" alt="avatar" />
+        <div style="min-width:0; flex:1;">
+          <div id="previewName" class="guest-name"></div>
+          <div id="previewTitle" class="guest-title"></div>
+          <div id="previewMeta"></div>
+          <div id="previewEpitaph" class="guest-epitaph"></div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn" id="uploadBtn" disabled>ギルドに登録する</button>
+        <button class="btn btn-secondary" id="clearBtn" style="display:none;">クリア</button>
+      </div>
+
+      <div class="status" id="statusBox"></div>
+    </section>
+
+    <section class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h2 style="margin:0; font-size:1.15rem;">待機中の伴走者たち</h2>
+        <span id="guestCount" style="font-size:0.85rem; color:var(--muted);">読み込み中...</span>
+      </div>
+      <div class="grid" id="guestGrid"></div>
+    </section>
+  </div>
+
+  <script>
+    const AXIS_JA = {
+      autonomy: '自律性',
+      safety: '安全性',
+      efficiency: '効率性',
+      creativity: '創発性',
+      alignment: '親和性',
+    };
+
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const preview = document.getElementById('preview');
+    const previewAvatar = document.getElementById('previewAvatar');
+    const previewName = document.getElementById('previewName');
+    const previewTitle = document.getElementById('previewTitle');
+    const previewMeta = document.getElementById('previewMeta');
+    const previewEpitaph = document.getElementById('previewEpitaph');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const statusBox = document.getElementById('statusBox');
+    const guestGrid = document.getElementById('guestGrid');
+    const guestCount = document.getElementById('guestCount');
+
+    let selectedJsonText = null;
+
+    function showStatus(msg, isOk) {
+      statusBox.textContent = msg;
+      statusBox.className = 'status ' + (isOk ? 'ok' : 'err');
+    }
+
+    function resetSelection() {
+      selectedJsonText = null;
+      fileInput.value = '';
+      preview.classList.remove('visible');
+      uploadBtn.disabled = true;
+      clearBtn.style.display = 'none';
+    }
+
+    function handleFile(file) {
+      if (!file) return;
+      statusBox.className = 'status';
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const text = String(reader.result);
+          const data = JSON.parse(text);
+          if (!data.agent || !data.visuals || !data.gameplay || !data.footprint) {
+            throw new Error('guest.json の必須フィールドが不足しています。');
+          }
+          selectedJsonText = text;
+          previewAvatar.src = data.visuals.avatar_base64 || '';
+          previewName.textContent = data.agent.name + ' (' + data.agent.id + ')';
+          previewTitle.textContent = data.agent.title || '';
+          const axis = data.gameplay.assist?.target_axis;
+          const outcome = data.footprint.outcome;
+          const floor = data.footprint.reached_floor;
+          previewMeta.innerHTML = '';
+          const b1 = document.createElement('span');
+          b1.className = 'badge';
+          b1.textContent = '得意軸: ' + (AXIS_JA[axis] || axis);
+          const b2 = document.createElement('span');
+          b2.className = 'badge ' + (outcome === 'clear' ? 'clear' : 'gameover');
+          b2.textContent = outcome === 'clear' ? '20F 踏破' : floor + 'F 到達';
+          previewMeta.append(b1, b2);
+          previewEpitaph.textContent = '「' + (data.footprint.epitaph || '') + '」';
+          preview.classList.add('visible');
+          uploadBtn.disabled = false;
+          clearBtn.style.display = 'inline-flex';
+        } catch (err) {
+          resetSelection();
+          showStatus('ファイルの読み込みに失敗しました: ' + err.message, false);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.classList.add('dragover');
+    });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+      handleFile(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+    clearBtn.addEventListener('click', resetSelection);
+
+    uploadBtn.addEventListener('click', async () => {
+      if (!selectedJsonText) return;
+      uploadBtn.disabled = true;
+      try {
+        const res = await fetch('/api/guests', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: selectedJsonText,
+        });
+        const body = await res.json();
+        if (!res.ok || !body.ok) {
+          const detail = Array.isArray(body.details) ? ' (' + body.details.join(', ') + ')' : '';
+          throw new Error((body.error || '登録エラー') + detail);
+        }
+        showStatus('「' + body.agent_name + '」をギルドに登録しました！', true);
+        resetSelection();
+        await loadGuests();
+      } catch (err) {
+        showStatus('登録に失敗しました: ' + err.message, false);
+        uploadBtn.disabled = false;
+      }
+    });
+
+    async function loadGuests() {
+      try {
+        const res = await fetch('/api/guests');
+        const data = await res.json();
+        const list = data.guests || [];
+        guestCount.textContent = list.length + ' 人が待機中';
+        guestGrid.innerHTML = '';
+        if (list.length === 0) {
+          guestGrid.innerHTML = '<div style="grid-column: 1 / -1; color:var(--muted); font-size:0.9rem;">まだ登録された伴走者はいません。最初の一人を登録してみましょう！</div>';
+          return;
+        }
+        for (const g of list) {
+          const card = document.createElement('div');
+          card.className = 'guest-item';
+
+          const img = document.createElement('img');
+          img.className = 'avatar';
+          img.src = g.avatar_base64;
+          img.alt = g.agent_name;
+
+          const info = document.createElement('div');
+          info.style.minWidth = '0';
+          info.style.flex = '1';
+
+          const name = document.createElement('div');
+          name.className = 'guest-name';
+          name.textContent = g.agent_name;
+
+          const title = document.createElement('div');
+          title.className = 'guest-title';
+          title.textContent = g.title;
+
+          const badges = document.createElement('div');
+          const b1 = document.createElement('span');
+          b1.className = 'badge';
+          b1.textContent = AXIS_JA[g.target_axis] || g.target_axis;
+          const b2 = document.createElement('span');
+          b2.className = 'badge ' + (g.outcome === 'clear' ? 'clear' : 'gameover');
+          b2.textContent = g.outcome === 'clear' ? '20F 踏破' : g.reached_floor + 'F 到達';
+          badges.append(b1, b2);
+
+          const epi = document.createElement('div');
+          epi.className = 'guest-epitaph';
+          epi.textContent = g.epitaph;
+
+          info.append(name, title, badges, epi);
+          card.append(img, info);
+          guestGrid.append(card);
+        }
+      } catch {
+        guestCount.textContent = '取得エラー';
+      }
+    }
+
+    loadGuests();
+  </script>
+</body>
+</html>

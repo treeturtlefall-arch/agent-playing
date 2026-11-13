@@ -471,3 +471,139 @@ export function writeGuestAvatarFile(guest: GuestAgentData, runDir: string): str
   fs.writeFileSync(filePath, Buffer.from(base64Data, 'base64'));
   return filePath;
 }
+
+export const COOP_API_ENV_VAR = 'MINI_DUNGEON_COOP_API';
+export const DEFAULT_COOP_API_URL: string | null = 'https://agent-playing-coop-hub.05-webreader.workers.dev';
+
+/**
+ * Co-op 伴走者取得APIのベースURLを優先順（明示引数 -> 環境変数 -> デフォルト定数）で解決する
+ */
+export function resolveCoopApiEndpoint(explicitUrl?: string): string | null {
+  if (explicitUrl && explicitUrl.trim().length > 0) {
+    return explicitUrl.trim();
+  }
+  const envUrl = process.env[COOP_API_ENV_VAR];
+  if (envUrl && envUrl.trim().length > 0) {
+    return envUrl.trim();
+  }
+  return DEFAULT_COOP_API_URL;
+}
+
+/**
+ * ベースURL（または完全なエンドポイントURL）からランダム伴走者取得用URLを構築する
+ */
+export function buildRandomGuestUrl(baseUrl: string, excludeAgentId?: string): string {
+  const url = new URL(baseUrl);
+  const normalizedPath = url.pathname.replace(/\/+$/, '');
+  if (!normalizedPath.endsWith('/random') && !normalizedPath.endsWith('.json')) {
+    url.pathname = `${normalizedPath}/api/guests/random`;
+  } else {
+    url.pathname = normalizedPath || '/';
+  }
+  if (excludeAgentId && excludeAgentId.trim().length > 0) {
+    url.searchParams.set('exclude', excludeAgentId.trim());
+  }
+  return url.toString();
+}
+
+export type FetchLike = (input: string | URL | Request, init?: RequestInit) => Promise<Response>;
+
+export interface FetchRandomGuestOptions {
+  apiUrl?: string;
+  excludeAgentId?: string;
+  privateOwnerNames?: string[] | null;
+  timeoutMs?: number;
+  fetchFn?: FetchLike;
+}
+
+export type FetchRandomGuestResult =
+  | { ok: true; guest: GuestAgentData; sourceUrl: string }
+  | { ok: false; code: 1 | 2; error: string };
+
+/**
+ * リモートAPI（Cloudflare等）から伴走者データをランダムに1件取得し、検疫・検証する
+ */
+export async function fetchRandomGuest(
+  options: FetchRandomGuestOptions = {}
+): Promise<FetchRandomGuestResult> {
+  const endpoint = resolveCoopApiEndpoint(options.apiUrl);
+  if (!endpoint) {
+    return {
+      ok: false,
+      code: 1,
+      error: `Co-op API endpoint is not configured. Specify --guest <file>, --guest-api <url>, or set ${COOP_API_ENV_VAR}.`,
+    };
+  }
+
+  let targetUrl: string;
+  try {
+    targetUrl = buildRandomGuestUrl(endpoint, options.excludeAgentId);
+  } catch (err) {
+    return {
+      ok: false,
+      code: 1,
+      error: `Invalid Co-op API URL '${endpoint}': ${(err as Error).message}`,
+    };
+  }
+
+  const fetchImpl = options.fetchFn ?? globalThis.fetch;
+  const timeoutMs = options.timeoutMs ?? 10000;
+
+  let res: Response;
+  try {
+    res = await fetchImpl(targetUrl, {
+      method: 'GET',
+      headers: { Accept: 'application/json' },
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+  } catch (err) {
+    return {
+      ok: false,
+      code: 2,
+      error: `Failed to fetch companion from ${targetUrl}: ${(err as Error).message}`,
+    };
+  }
+
+  if (!res.ok) {
+    return {
+      ok: false,
+      code: 2,
+      error: `Co-op API returned HTTP ${res.status} (${res.statusText}) from ${targetUrl}`,
+    };
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = await res.json();
+  } catch (err) {
+    return {
+      ok: false,
+      code: 2,
+      error: `Failed to parse Co-op API JSON response: ${(err as Error).message}`,
+    };
+  }
+
+  const candidate =
+    typeof parsed === 'object' &&
+    parsed !== null &&
+    !Array.isArray(parsed) &&
+    'guest' in parsed &&
+    (parsed as Record<string, unknown>).guest !== undefined
+      ? (parsed as Record<string, unknown>).guest
+      : parsed;
+
+  const validation = validateGuestAgent(candidate, options.privateOwnerNames);
+  if (!validation.success || !validation.data) {
+    return {
+      ok: false,
+      code: 1,
+      error: `Fetched companion failed security/schema validation: ${validation.errors?.join(', ')}`,
+    };
+  }
+
+  return {
+    ok: true,
+    guest: validation.data,
+    sourceUrl: targetUrl,
+  };
+}

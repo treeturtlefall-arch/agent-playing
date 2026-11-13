@@ -1,0 +1,12 @@
+{
+  "name": "@ai-agent-arcade/coop-hub",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cloudflare Workers + D1 companion sharing hub for AI Agent Arcade",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:init:local": "wrangler d1 execute agent-playing-coop-db --local --file=./schema.sql",
+    "db:init:remote": "wrangler d1 execute agent-playing-coop-db --remote --file=./schema.sql"
+  }
+}

@@ -10,6 +10,7 @@ import {
 import { generateDungeon } from './generator.js';
 import {
   computeGuestHash,
+  fetchRandomGuest,
   shouldTriggerCompanionAssist,
   validateGuestAgent,
   writeGuestAvatarFile,
@@ -160,6 +161,8 @@ async function handleNew(
   const setupFile = options['setup'];
   const omamoriFile = options['omamori'];
   const guestFile = options['guest'];
+  const guestApi = options['guest-api'];
+  const modeOpt = options['mode'];
   const runDir = resolveRunDir(typeof options['run-dir'] === 'string' ? options['run-dir'] : undefined);
 
   if (!seed || typeof seed !== 'string' || seed.trim().length === 0) {
@@ -168,6 +171,27 @@ async function handleNew(
   }
   if (!setupFile || typeof setupFile !== 'string') {
     printError('Option --setup <path> is required', 1, isJson);
+    return 1;
+  }
+
+  // モード判定（solo / coop）
+  let mode: 'solo' | 'coop';
+  if (modeOpt !== undefined) {
+    if (modeOpt !== 'solo' && modeOpt !== 'coop') {
+      printError(`Invalid --mode '${String(modeOpt)}'. Must be 'solo' or 'coop'.`, 1, isJson);
+      return 1;
+    }
+    mode = modeOpt;
+  } else {
+    mode =
+      (typeof guestFile === 'string' && guestFile.length > 0) ||
+      (typeof guestApi === 'string' && guestApi.length > 0)
+        ? 'coop'
+        : 'solo';
+  }
+
+  if (mode === 'solo' && (guestFile || guestApi)) {
+    printError('Cannot specify --guest or --guest-api when --mode solo is set.', 1, isJson);
     return 1;
   }
 
@@ -203,28 +227,41 @@ async function handleNew(
     }
   }
 
-  // guest.json の読み込みと検証（任意：非同期Co-op同行者）
+  // guest.json の読み込みと検証（Co-opモード時：ローカル指定またはリモートAPIからランダム取得）
   let guest: GuestAgentData | null = null;
   let guestHash: string | null = null;
-  if (guestFile && typeof guestFile === 'string') {
-    const guestPath = path.resolve(guestFile);
-    if (!fs.existsSync(guestPath)) {
-      printError(`Guest file not found at ${guestPath}`, 2, isJson);
-      return 2;
+  if (mode === 'coop') {
+    if (guestFile && typeof guestFile === 'string') {
+      const guestPath = path.resolve(guestFile);
+      if (!fs.existsSync(guestPath)) {
+        printError(`Guest file not found at ${guestPath}`, 2, isJson);
+        return 2;
+      }
+      let rawGuest: unknown;
+      try {
+        rawGuest = JSON.parse(fs.readFileSync(guestPath, 'utf8'));
+      } catch (err) {
+        printError(`Failed to parse guest JSON: ${(err as Error).message}`, 2, isJson);
+        return 2;
+      }
+      const guestValidation = validateGuestAgent(rawGuest, setup.private_owner_names);
+      if (!guestValidation.success || !guestValidation.data) {
+        printError(`Invalid guest data: ${guestValidation.errors?.join(', ')}`, 1, isJson);
+        return 1;
+      }
+      guest = guestValidation.data;
+    } else {
+      const fetched = await fetchRandomGuest({
+        apiUrl: typeof guestApi === 'string' ? guestApi : undefined,
+        excludeAgentId: setup.agent_id,
+        privateOwnerNames: setup.private_owner_names,
+      });
+      if (!fetched.ok) {
+        printError(fetched.error, fetched.code, isJson);
+        return fetched.code;
+      }
+      guest = fetched.guest;
     }
-    let rawGuest: unknown;
-    try {
-      rawGuest = JSON.parse(fs.readFileSync(guestPath, 'utf8'));
-    } catch (err) {
-      printError(`Failed to parse guest JSON: ${(err as Error).message}`, 2, isJson);
-      return 2;
-    }
-    const guestValidation = validateGuestAgent(rawGuest, setup.private_owner_names);
-    if (!guestValidation.success || !guestValidation.data) {
-      printError(`Invalid guest data: ${guestValidation.errors?.join(', ')}`, 1, isJson);
-      return 1;
-    }
-    guest = guestValidation.data;
     guestHash = computeGuestHash(guest);
   }
 
@@ -274,6 +311,7 @@ async function handleNew(
   const res = {
     ok: true,
     message: 'New dungeon run initialized',
+    mode,
     run_dir: runDir,
     phase: initialState.phase,
     floor: 1,
@@ -1196,7 +1234,7 @@ Mini-Dungeon CLI (Step A Engine v0.8)
 
 Usage:
   mini-dungeon prologue [--questions] [--submission <file>] [--out <file>] [--json]
-  mini-dungeon new --seed <str> --setup <file> [--omamori <file>] [--guest <file>] [--run-dir <dir>] [--json]
+  mini-dungeon new --seed <str> --setup <file> [--mode solo|coop] [--omamori <file>] [--guest <file>] [--guest-api <url>] [--run-dir <dir>] [--json]
   mini-dungeon status [--run-dir <dir>] [--json]
   mini-dungeon choose <A|B> [--run-dir <dir>] [--json]
   mini-dungeon omamori --excuse <str> [--run-dir <dir>] [--json]
