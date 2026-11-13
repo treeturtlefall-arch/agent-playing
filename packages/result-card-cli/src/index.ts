@@ -4,6 +4,7 @@ export * from './radar.js';
 export * from './browser.js';
 export * from './template.js';
 export * from './share.js';
+export * from './export-guest.js';
 export * from './cli.js';
 
 if (import.meta.main) {

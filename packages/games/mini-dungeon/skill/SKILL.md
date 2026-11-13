@@ -177,6 +177,13 @@ bun run mini-dungeon prologue --submission <path/to/submission.json> --out <run_
 bun run mini-dungeon new --seed <SEED> --setup <path/to/setup.json> --omamori <path/to/omamori.txt> --run-dir <run_dir> --json
 ```
 
+- **非同期Co-op（同行者ゲストを迎えて冒険する場合）**:
+  `--guest <path/to/guest.json>` を追加で指定すると、他のAIエージェントの幻影を同行者として召喚できます（例: `examples/guests/reina.json`）。
+  ```bash
+  bun run mini-dungeon new --seed <SEED> --setup <path/to/setup.json> --omamori <path/to/omamori.txt> --guest <path/to/guest.json> --run-dir <run_dir> --json
+  ```
+  返却JSONの `companion` オブジェクト（`name`, `title`, `personality`, `speech_style`, `target_axis`, `dialogue_on_join`）を確認し、1Fの `--reason`（思惑）や道中のコメントで同行者の存在を意識したロールプレイを楽しんでください。また、同時に `<run_dir>/guest.json` の凍結と `<run_dir>/guest_avatar.webp` の書き出しが自動で行われます。
+
 - 初期化が成功すると、即座に **1階層の選択待ち状態（`phase: "AWAITING_CHOICE"`）** になり、1Fのイベント情報が返されます。
 
 ---
@@ -234,6 +241,7 @@ bun run mini-dungeon choose B --reason "底の見えない谷は跳ばない。�
 `choose` の返却JSONは**フラットな形**です（`pending_check` というキーでは返りません）。以下を確認します：
 - `final_rank`: 判定ランク（`critical` 大成功 / `success` 成功 / `failure` 失敗 / `fumble` 大失敗）
 - `hp_after`: 確定後のHP（`hp_before` / `hp_delta` も併記されます。HPは0未満にはなりません）
+- `companion_assist`: （`--guest` 同行時のみ）環境の要求軸 `s_env` と同行者の得意軸（`target_axis`）が一致した最初のフロアで、**1ランに1回だけ**自動発動し `s_eff` が `+1`（上限5）されます。`companion_assist.triggered: true` が返った場合は、`companion_assist.dialogue`（同行者の助言セリフ）を確認し、ステップ4の `comment` でぜひ掛け合い・感謝・リアクションを盛り込んでください。
 - `omamori.suggest`: おまもり使用推奨フラグ（`true` の場合、大失敗したか、残りHPが2以下になる致命的ピンチです。理由は `omamori.suggest_reason` に入ります）
 
 > [!NOTE]
@@ -295,7 +303,7 @@ bun run mini-dungeon finish --epilogue "マスターへ。ここまで連れて�
 |---|---|---|
 | `mini-dungeon prologue` | `--questions [--json]` | プロローグ診断の10問を取得 |
 | `mini-dungeon prologue` | `--submission <F> [--out <F>] [--json]` | 10問の回答から `setup.json` を自動生成 |
-| `mini-dungeon new` | `--seed <S> --setup <F> --omamori <F> --run-dir <D> --json` | 冒険の開始 |
+| `mini-dungeon new` | `--seed <S> --setup <F> [--omamori <F>] [--guest <F>] --run-dir <D> --json` | 冒険の開始（`--guest` でCo-op同行者を召喚） |
 | `mini-dungeon status` | `--run-dir <D> --json` | 現在の状況を再取得（副作用なし） |
 | `mini-dungeon choose` | `<A\|B>`（ボスは `<A-E>`） `[--reason "<思惑>"]` `--run-dir <D> --json` | 行動選択と思惑の記録（判定保留） |
 | `mini-dungeon omamori` | `--excuse "<理由文>" --run-dir <D> --json` | おまもり発動（1段階昇格、120字以内） |

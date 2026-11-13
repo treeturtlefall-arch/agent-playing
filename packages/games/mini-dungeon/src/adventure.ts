@@ -1,14 +1,21 @@
 import { getEventById } from './data/events.js';
 import { rankToJa } from './summary.js';
-import { STYLE_AXES, type ActionLogEntry, type CliState, type StyleAxis } from './types.js';
+import {
+  STYLE_AXES,
+  type ActionLogEntry,
+  type CliState,
+  type GuestAgentData,
+  type StyleAxis,
+} from './types.js';
 
 export interface GenerateAdventureMdOptions {
   state: CliState;
   logHash: string;
+  guest?: GuestAgentData | null;
 }
 
 export function generateAdventureMd(options: GenerateAdventureMdOptions): string {
-  const { state, logHash } = options;
+  const { state, logHash, guest = null } = options;
   const {
     setup,
     seed,
@@ -60,6 +67,15 @@ export function generateAdventureMd(options: GenerateAdventureMdOptions): string
     lines.push(`| **${axis}** | \`${bar}\` (${val}/5) | **${label}** |`);
   }
   lines.push('');
+
+  if (guest) {
+    lines.push('### 🤝 同行する幻影（非同期Co-opゲスト）');
+    lines.push(
+      `- **${guest.agent.name}**（*${guest.agent.title}*）｜得意軸: \`${guest.gameplay.assist.target_axis}\` (V2o アシスト)`
+    );
+    lines.push(`- 🗣️ **合流時**: *「${guest.dialogues.on_join}」*`);
+    lines.push('');
+  }
 
   // 3. 冒険の軌跡（3幕構成）
   for (const log of history) {
@@ -155,6 +171,13 @@ export function generateAdventureMd(options: GenerateAdventureMdOptions): string
     lines.push(
       `- 🎲 **判定**: 2d6 \`[${log.dice[0]}, ${log.dice[1]}]\` ${modStr} ＝ **${log.total_score}** / DC ${log.dc} ➔ ${rankBadge}（${hpChangeText}）`
     );
+
+    // 同行者アシスト発動演出（V2o）
+    if (log.companion_assisted && guest) {
+      lines.push(
+        `- 🤝 **同行者アシスト発動！【${guest.agent.name}（${guest.agent.title}）】**: 得意軸 \`${guest.gameplay.assist.target_axis}\` 共鳴により実効素質 \`s_eff + 1\`（確定 \`s_eff = ${log.s_eff}\`） — *「${guest.dialogues.on_assist}」*`
+      );
+    }
 
     // おまもり発動演出
     if (log.omamori_used) {
@@ -269,6 +292,15 @@ export function generateAdventureMd(options: GenerateAdventureMdOptions): string
       omamori_used ? `✅ **${omamori_floor}F にて奇跡の発動**` : '未使用'
     } |`
   );
+  if (guest) {
+    lines.push(
+      `| **同行者（Co-op）** | **${guest.agent.name}**（${guest.agent.title}） | ${
+        state.companion_assisted
+          ? `🤝 **${state.companion_assist_floor}F にて軸一致アシスト発動** (\`${guest.gameplay.assist.target_axis}\`)`
+          : `待機 (\`${guest.gameplay.assist.target_axis}\`)`
+      } |`
+    );
+  }
   lines.push(`| **行動ログハッシュ** | \`${logHash}\` | 改竄防止 SHA-256 検証済 |`);
   lines.push('');
 

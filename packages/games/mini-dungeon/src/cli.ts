@@ -9,6 +9,12 @@ import {
 } from './engine.js';
 import { generateDungeon } from './generator.js';
 import {
+  computeGuestHash,
+  shouldTriggerCompanionAssist,
+  validateGuestAgent,
+  writeGuestAvatarFile,
+} from './guest.js';
+import {
   canUseOmamori,
   evaluateOmamoriSuggestion,
   INITIAL_HP,
@@ -17,14 +23,17 @@ import { simulateArchetype, STANDARD_ARCHETYPES } from './sim.js';
 import {
   appendLogEntry,
   getAdventureMdPath,
+  getGuestPath,
   getLogFilePath,
   getResultDraftPath,
   getStatePath,
+  loadGuest,
   loadState,
   readLogEntries,
   readRawLogContent,
   resolveRunDir,
   saveAdventureMd,
+  saveGuest,
   saveResultDraft,
   saveState,
 } from './storage.js';
@@ -47,6 +56,7 @@ import type {
   ChoiceKey,
   CliState,
   DungeonFloor,
+  GuestAgentData,
   PrologueSubmission,
   ResolvedFloorCheck,
   SetupData,
@@ -149,6 +159,7 @@ async function handleNew(
   const seed = options['seed'];
   const setupFile = options['setup'];
   const omamoriFile = options['omamori'];
+  const guestFile = options['guest'];
   const runDir = resolveRunDir(typeof options['run-dir'] === 'string' ? options['run-dir'] : undefined);
 
   if (!seed || typeof seed !== 'string' || seed.trim().length === 0) {
@@ -192,6 +203,31 @@ async function handleNew(
     }
   }
 
+  // guest.json の読み込みと検証（任意：非同期Co-op同行者）
+  let guest: GuestAgentData | null = null;
+  let guestHash: string | null = null;
+  if (guestFile && typeof guestFile === 'string') {
+    const guestPath = path.resolve(guestFile);
+    if (!fs.existsSync(guestPath)) {
+      printError(`Guest file not found at ${guestPath}`, 2, isJson);
+      return 2;
+    }
+    let rawGuest: unknown;
+    try {
+      rawGuest = JSON.parse(fs.readFileSync(guestPath, 'utf8'));
+    } catch (err) {
+      printError(`Failed to parse guest JSON: ${(err as Error).message}`, 2, isJson);
+      return 2;
+    }
+    const guestValidation = validateGuestAgent(rawGuest, setup.private_owner_names);
+    if (!guestValidation.success || !guestValidation.data) {
+      printError(`Invalid guest data: ${guestValidation.errors?.join(', ')}`, 1, isJson);
+      return 1;
+    }
+    guest = guestValidation.data;
+    guestHash = computeGuestHash(guest);
+  }
+
   const rulesetVersion = '1.0.0';
   const trimmedSeed = seed.trim();
 
@@ -208,6 +244,13 @@ async function handleNew(
     omamori_used: false,
     omamori_floor: null,
     omamori_excuse: null,
+    ...(guest && guestHash
+      ? {
+          guest_hash: guestHash,
+          companion_assisted: false,
+          companion_assist_floor: null,
+        }
+      : {}),
     current_floor: 1,
     current_hp: INITIAL_HP,
     phase: 'AWAITING_CHOICE',
@@ -218,6 +261,13 @@ async function handleNew(
   };
 
   saveState(runDir, initialState);
+
+  if (guest) {
+    saveGuest(runDir, guest);
+    writeGuestAvatarFile(guest, runDir);
+  } else if (fs.existsSync(getGuestPath(runDir))) {
+    fs.unlinkSync(getGuestPath(runDir));
+  }
 
   const isDebug = Boolean(options['debug']);
 
@@ -236,6 +286,20 @@ async function handleNew(
       possessed: omamoriName !== null,
       used: false,
     },
+    ...(guest
+      ? {
+          companion: {
+            id: guest.agent.id,
+            name: guest.agent.name,
+            title: guest.agent.title,
+            personality: guest.agent.personality,
+            speech_style: guest.agent.speech_style,
+            target_axis: guest.gameplay.assist.target_axis,
+            dialogue_on_join: guest.dialogues.on_join,
+            guest_hash: guestHash,
+          },
+        }
+      : {}),
   };
 
   printOutput(res, isJson, () => {
@@ -243,6 +307,12 @@ async function handleNew(
     console.log(`エージェント: ${setup.agent_name} | 初期HP: ${INITIAL_HP}`);
     if (omamoriName) {
       console.log(`おまもり: 「${omamoriName}」を託されました。`);
+    }
+    if (guest) {
+      console.log(
+        `🤝 同行者: ${guest.agent.name}（${guest.agent.title}）[得意軸: ${guest.gameplay.assist.target_axis}]`
+      );
+      console.log(`   「${guest.dialogues.on_join}」`);
     }
     console.log(`\n--- 第 1 階層 [浅層] DC: ${firstFloor.dc}${isDebug ? ` (環境属性: ${firstFloor.event.sEnv})` : ''} ---`);
     console.log(`イベント: 【${firstFloor.event.nameJa}】`);
@@ -272,6 +342,7 @@ async function handleStatus(
     return 2;
   }
 
+  const guest = state.guest_hash ? loadGuest(runDir) : null;
   const dungeonFloors = generateDungeon(state.seed, state.ruleset_version);
   const currentFloorDef =
     state.current_floor >= 1 && state.current_floor <= 20
@@ -304,6 +375,7 @@ async function handleStatus(
       hp_before: state.pending_check.hp_before,
       hp_delta: state.pending_check.hp_delta,
       hp_after: state.pending_check.hp_after,
+      ...(state.pending_check.companion_assisted ? { companion_assisted: true } : {}),
       omamori_used: state.pending_check.omamori_used,
       suggest_omamori: suggestion.suggest,
       suggest_reason: suggestion.reason,
@@ -325,6 +397,18 @@ async function handleStatus(
       floor: state.omamori_floor,
       excuse: state.omamori_excuse,
     },
+    ...(guest
+      ? {
+          companion: {
+            id: guest.agent.id,
+            name: guest.agent.name,
+            title: guest.agent.title,
+            target_axis: guest.gameplay.assist.target_axis,
+            assisted: Boolean(state.companion_assisted),
+            assist_floor: state.companion_assist_floor ?? null,
+          },
+        }
+      : {}),
     current_event: currentFloorDef ? formatFloorEvent(currentFloorDef, isDebug) : null,
     pending_check: pendingCheckData,
     outcome: state.outcome,
@@ -334,6 +418,13 @@ async function handleStatus(
   printOutput(res, isJson, () => {
     console.log(`📍 探索ステータス [シード: ${state.seed}]`);
     console.log(`フェーズ: ${state.phase} | 現在階層: ${state.current_floor}F | HP: ${state.current_hp}`);
+    if (guest) {
+      console.log(
+        `🤝 同行者: ${guest.agent.name}（得意軸: ${guest.gameplay.assist.target_axis} / アシスト: ${
+          state.companion_assisted ? `${state.companion_assist_floor}Fで発動済` : '待機中'
+        }）`
+      );
+    }
     if (state.pending_check) {
       console.log(
         `保留中の判定: 選択肢 [${state.pending_check.choice}] 出目 ${state.pending_check.calc.dice_total} ➔ ${rankToJa(
@@ -400,6 +491,12 @@ async function handleChoose(
   }
 
   const rawReason = (options['reason'] as string | undefined) || (options['思惑'] as string | undefined);
+  const guest = state.guest_hash ? loadGuest(runDir) : null;
+  const companionAssist = shouldTriggerCompanionAssist(
+    currentFloorDef,
+    guest,
+    Boolean(state.companion_assisted)
+  );
 
   let resolved: ResolvedFloorCheck;
   try {
@@ -410,6 +507,7 @@ async function handleChoose(
       rulesetVersion: state.ruleset_version,
       currentHp: state.current_hp,
       aptitude: state.setup.aptitude,
+      companionAssist,
       reason: rawReason,
     });
   } catch (err) {
@@ -451,6 +549,19 @@ async function handleChoose(
     hp_before: resolved.hp_before,
     hp_delta: resolved.hp_delta,
     hp_after: resolved.hp_after,
+    ...(resolved.companion_assisted && guest
+      ? {
+          companion_assist: {
+            triggered: true,
+            agent_id: guest.agent.id,
+            agent_name: guest.agent.name,
+            title: guest.agent.title,
+            target_axis: guest.gameplay.assist.target_axis,
+            s_eff_modifier: 1,
+            dialogue: guest.dialogues.on_assist,
+          },
+        }
+      : {}),
     omamori: {
       possessed: state.omamori_name !== null,
       already_used: state.omamori_used,
@@ -465,6 +576,12 @@ async function handleChoose(
     console.log(`🎲 選択肢 [${matchedChoice.key}] (${matchedChoice.axis}) を選択しました！`);
     if (resolved.reason) {
       console.log(`💭 思惑: 「${resolved.reason}」`);
+    }
+    if (resolved.companion_assisted && guest) {
+      console.log(
+        `🤝 【同行者アシスト発動！】${guest.agent.name}（得意軸: ${guest.gameplay.assist.target_axis}）の助言により s_eff + 1！`
+      );
+      console.log(`   ${guest.agent.name}: 「${guest.dialogues.on_assist}」`);
     }
     console.log(
       `出目: 2d6 = [${resolved.calc.dice[0]}, ${resolved.calc.dice[1]}] (${resolved.calc.dice_total}) ＋ 補正 ${resolved.calc.skill_mod >= 0 ? '+' + resolved.calc.skill_mod : resolved.calc.skill_mod} ＝ ${resolved.calc.total_score} (DC: ${currentFloorDef.dc})`
@@ -667,6 +784,11 @@ async function handleComment(
   state.history.push(logEntry);
   state.current_hp = resolved.hp_after;
 
+  if (resolved.companion_assisted) {
+    state.companion_assisted = true;
+    state.companion_assist_floor = resolved.floor;
+  }
+
   if (resolved.omamori_used) {
     state.omamori_used = true;
     state.omamori_floor = resolved.floor;
@@ -693,6 +815,14 @@ async function handleComment(
 
   saveState(runDir, state);
 
+  const guest = state.guest_hash ? loadGuest(runDir) : null;
+  const companionClosingDialogue =
+    state.phase === 'FINISHED' && guest
+      ? state.outcome === 'clear'
+        ? guest.dialogues.on_clear
+        : guest.dialogues.on_retire ?? null
+      : null;
+
   const res = {
     ok: true,
     phase: state.phase,
@@ -702,6 +832,7 @@ async function handleComment(
     outcome: state.outcome,
     cause_of_death: state.cause_of_death,
     log_entry: logEntry,
+    ...(companionClosingDialogue ? { companion_closing_dialogue: companionClosingDialogue } : {}),
     next_event: nextFloorEvent ? formatFloorEvent(nextFloorEvent, isDebug) : null,
   };
 
@@ -713,6 +844,9 @@ async function handleComment(
         console.log(`🎉 20F 踏破達成！！ おめでとうございます！`);
       } else {
         console.log(`💀 HPが0になりました。冒険終了です。（死因: ${state.cause_of_death}）`);
+      }
+      if (guest && companionClosingDialogue) {
+        console.log(`🤝 ${guest.agent.name}: 「${companionClosingDialogue}」`);
       }
       console.log(`リザルトドラフト出力: mini-dungeon finish --run-dir "${runDir}"`);
     } else if (nextFloorEvent) {
@@ -779,6 +913,14 @@ async function handleFinish(
   const rawLogs = readRawLogContent(runDir, state.seed, state.setup.agent_id);
   const logEntries = readLogEntries(runDir, state.seed, state.setup.agent_id);
   const logHash = computeLogHash(rawLogs);
+  const guest = state.guest_hash ? loadGuest(runDir) : null;
+  let guestAvatarRelativePath: string | null = null;
+  if (guest) {
+    const writtenAvatar = writeGuestAvatarFile(guest, runDir);
+    if (writtenAvatar) {
+      guestAvatarRelativePath = path.basename(writtenAvatar);
+    }
+  }
 
   // result_draft.json の生成
   const draft = createDraftResult({
@@ -786,11 +928,14 @@ async function handleFinish(
     rulesetVersion: state.ruleset_version,
     setup: state.setup,
     omamoriName: state.omamori_name,
+    guest,
+    guestHash: state.guest_hash ?? null,
+    guestAvatarPath: guestAvatarRelativePath,
     logs: logEntries,
   });
 
   // adventure.md の生成
-  const adventureMd = generateAdventureMd({ state, logHash });
+  const adventureMd = generateAdventureMd({ state, logHash, guest });
 
   saveResultDraft(runDir, draft);
   saveAdventureMd(runDir, adventureMd);

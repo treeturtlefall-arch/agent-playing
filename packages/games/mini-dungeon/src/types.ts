@@ -69,6 +69,7 @@ export interface CheckCalculation {
   dc: number;
   diff: number;
   raw_rank: CheckRank;
+  companion_assisted?: boolean;
 }
 
 export interface ResolvedFloorCheck {
@@ -77,6 +78,7 @@ export interface ResolvedFloorCheck {
   choice: ChoiceKey;
   choice_axis: StyleAxis;
   calc: CheckCalculation;
+  companion_assisted?: boolean;
   omamori_used: boolean;
   omamori_excuse: string | null;
   final_rank: CheckRank;
@@ -97,6 +99,7 @@ export interface ActionLogEntry {
   choice_axis: StyleAxis;
   s_act: number;
   s_eff: number;
+  companion_assisted?: boolean;
   dice: [number, number];
   dice_total: number;
   skill_mod: number;
@@ -111,6 +114,50 @@ export interface ActionLogEntry {
   hp_after: number;
   reason?: string;
   comment: string;
+}
+
+export interface GuestAgentData {
+  schema_version: '1.0';
+  exported_at: string;
+  agent: {
+    id: string;
+    name: string;
+    title: string;
+    self_intro?: string | null;
+    persona_tags?: string[];
+    personality: string;
+    speech_style: string;
+  };
+  visuals: {
+    avatar_url?: string | null;
+    avatar_base64: string;
+    appearance_prompt: string;
+    highlight_poses: {
+      on_assist: string;
+      on_clear?: string | null;
+    };
+  };
+  gameplay: {
+    style_axes: AptitudeMap;
+    style_axis_labels?: StyleAxisLabels;
+    assist: {
+      mode: 'v2o_axis_boost';
+      target_axis: StyleAxis;
+      s_eff_modifier: 1;
+    };
+  };
+  dialogues: {
+    on_join: string;
+    on_assist: string;
+    on_clear: string;
+    on_retire?: string | null;
+  };
+  footprint: {
+    reached_floor: number;
+    outcome: 'clear' | 'gameover' | 'retired';
+    epitaph: string;
+    seed?: string | null;
+  };
 }
 
 export type RunPhase =
@@ -131,6 +178,9 @@ export interface CliState {
   omamori_used: boolean;
   omamori_floor: number | null;
   omamori_excuse: string | null;
+  guest_hash?: string | null;
+  companion_assisted?: boolean;
+  companion_assist_floor?: number | null;
   current_floor: number;
   current_hp: number;
   phase: RunPhase;
@@ -147,6 +197,8 @@ export interface VerifyResult {
   agent_id: string;
   floor_count: number;
   log_hash: string;
+  guest_hash?: string | null;
+  companion_assist_floor?: number | null;
   outcome: 'clear' | 'gameover' | 'in_progress';
   errors?: string[];
 }
@@ -232,6 +284,7 @@ export interface DraftResultCard {
   verification: {
     action_log_ref: string;
     log_hash: string;
+    guest_hash?: string | null;
     replayable: boolean;
   };
   extensions: {

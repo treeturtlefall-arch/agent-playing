@@ -105,6 +105,7 @@ export interface ResultCardData {
   verification: {
     action_log_ref?: string | null;
     log_hash?: string | null;
+    guest_hash?: string | null;
     replayable: boolean;
   };
   extensions?: Record<string, unknown>;

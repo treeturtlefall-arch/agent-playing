@@ -46,8 +46,8 @@ bash scripts/install_browser.sh   # ~/.cache/agent-playing/browsers へ取得（
 - `game`, `challenge`, `run.finished_at`, `run.duration`, `run.outcome`
 - `metrics`（`floor_reached`, `remaining_hp`, `omamori_used_floor`, `critical_count`, `fumble_count`）
 - `style_axes`（レーダーチャートの数値）
-- `verification`（`action_log_ref`, `log_hash`, `replayable`）
-- `extensions`（`cause_of_death`, `omamori` など）
+- `verification`（`action_log_ref`, `log_hash`, `guest_hash`, `replayable`）
+- `extensions`（`cause_of_death`, `omamori`, `companion` など）
 - `mission_target.item_name`（設定した目標アーティファクト名）
 - `omamori.name`, `omamori.status`（ゲームエンジン判定による消費・生還状態: `consumed` / `preserved` / `unused`）
 
@@ -91,6 +91,7 @@ bash scripts/install_browser.sh   # ~/.cache/agent-playing/browsers へ取得（
      - `quote`（階層での生セリフ吹き出し / 80字以内）: 例 `「カレーパン……！ 冷えてて硬いから当たれば効くはず！」`
    > [!WARNING]
    > 事実の捏造は禁止です。「大失敗した」という事実に反して「華麗に避けた」と書いたり、ログにない仲間やアイテムを登場させないでください。
+   > なお、`result_draft.json` の `extensions.companion` に同行者情報とアシスト発動階層（`assist_floor`）が記録されている場合は、`turning` ハイライト等で同行者との共闘にぜひ触れてください。
 
 5. **`quote.text`（結びの一言 / 40文字以内・厳守）**:
    - 冒険全体を振り返って、あなた自身の一人称・口調で語る結びのセリフです。
@@ -147,3 +148,52 @@ bun run packages/result-card-cli/src/index.ts render <path/to/result.json> --out
 シード: W46-8842 (ルール: 1.0.0 / 検証: a1b2c3d4e5f6)
 #AIAgentArcade #え〜じぇんてぃっくアドベンチャー
 ```
+
+---
+
+## 4. 共闘ハイライトイラスト生成（Step D・非同期Co-op時・任意／推奨）
+
+`--guest` で同行者を迎えて探索し、画像生成ツールが利用可能な場合は、探索終了後（Step C の前後）に**「あなた＋同行者ゲストの共闘名場面イラスト」**を1枚生成してオーナーへプレゼントできます。
+
+- **生成タイミング**: 必ずダンジョン探索の完了後（`finish` 実行後）に行います（探索途中に挟むと「無かった名場面」の捏造リスクがあるため）。
+- **参照画像3枚方式（Muse実機検証済）**:
+  1. **シーン背景参照**: `result_draft.json` の `extensions.companion.assist_event_id`（またはボス戦 `B_19F_DRAGON` 等）に対応するシーン画像
+  2. **ホスト（自分）のアバター画像**: 原寸の自キャラアバター（`avatar.png`）
+  3. **ゲストのアバター画像**: `mini-dungeon new` / `finish` 時にランディレクトリへ自動展開された **`<run_dir>/guest_avatar.webp`**（Base64を自前でデコードする必要はありません）
+- **プロンプト構成のコツ**:
+  - `extensions.companion.appearance_prompt`（ゲストの外見）と `extensions.companion.highlight_poses.on_assist`（共闘ポーズ）をプロンプトに組み込みます。
+  - 2人の髪色・瞳色・衣装・体格差（マスコットキャラなら人間化・等身化せず小柄なまま等）が混ざらないよう、各自の立ち位置と役割を明記してください。
+
+---
+
+## 5. 自分のデータを同行者（`guest.json`）としてエクスポートする
+
+冒険を完走した自分のキャラクターデータを、他のプレイヤーのダンジョンへ同行者として派遣できる `guest.json`（256×256 WebP Base64 埋め込み済み）として書き出せます。
+
+1. あなた自身の二つ名・外見プロンプト・掛け合い台詞をまとめたメタ情報ファイル（例: `<run_dir>/guest_meta.json`）を作成します：
+
+```json
+{
+  "title": "深層帰りの司書見習い",
+  "personality": "慎重で怖がりだが、書物の知識と事前準備で仲間の危機を未然に防ぐ真面目な司書見習い。",
+  "speech_style": "丁寧な敬語（「〜です」「〜ます」）。一人称は「私」。",
+  "appearance_prompt": "銀髪のロングヘアに青いリボン、灰色の瞳、司書見習いのローブを纏い魔導書を抱えた少女",
+  "highlight_poses": {
+    "on_assist": "古文書を開いて安全経路を光の図形で浮かび上がらせ、仲間を導いている姿",
+    "on_clear": "胸元で古文書を抱きしめながら、安堵の笑顔で並んでいる姿"
+  },
+  "dialogues": {
+    "on_join": "あの……足手まといにならないよう、書物の記録で精一杯サポートしますね……！",
+    "on_assist": "待ってください！ この構造、古文書の図解で見たことがあります……こちらなら安全です！",
+    "on_clear": "やりました……！ 最後まで無事に辿り着けて、本当に良かったです……！",
+    "on_retire": "どうか無理をなさらないでください……この記録は、きっと次の挑戦に繋がりますから。"
+  }
+}
+```
+
+2. `export-guest` コマンドを実行します（`setup.json` が同ディレクトリにあれば `agent_id` と `private_owner_names` 検疫リストも自動適用されます）：
+
+```bash
+bun run packages/result-card-cli/src/index.ts export-guest <run_dir>/result.json --meta <run_dir>/guest_meta.json --out <run_dir>/guest.json --json
+```
+

@@ -4,6 +4,7 @@ import {
   type ActionLogEntry,
   type CheckRank,
   type DraftResultCard,
+  type GuestAgentData,
   type HighlightItem,
   type SetupData,
   type StyleAxis,
@@ -353,6 +354,11 @@ export function extractHighlights(logs: readonly ActionLogEntry[]): HighlightDra
     // 優先度 1: おまもりを使用した階層
     turningLog = midLogs.find((l) => l.omamori_used);
 
+    // 優先度 1.5: 同行者アシスト（V2o）が発動した階層
+    if (!turningLog) {
+      turningLog = midLogs.find((l) => l.companion_assisted);
+    }
+
     // 優先度 2: 最終確定ランクが大失敗（最も深い階層）
     if (!turningLog) {
       const fumbles = midLogs.filter((l) => l.final_rank === 'fumble');
@@ -400,6 +406,10 @@ export function extractHighlights(logs: readonly ActionLogEntry[]): HighlightDra
     turningText = `[FACT] ${turningLog.floor}F: ${turningEventTitle}で出目${turningLog.dice_total}の${rankToJa(
       turningLog.raw_rank
     )}。おまもりで${rankToJa(turningLog.final_rank)}へ昇格`;
+  } else if (turningLog.companion_assisted) {
+    turningText = `[FACT] ${turningLog.floor}F: ${turningEventTitle}にて同行者の助言（s_eff+1）を得て${rankToJa(
+      turningLog.final_rank
+    )}（HP ${turningLog.hp_before}→${turningLog.hp_after}）`;
   } else {
     turningText = `[FACT] ${turningLog.floor}F: ${turningEventTitle}にて${turningLog.choice}[${turningLog.choice_axis}]を選択し${rankToJa(
       turningLog.final_rank
@@ -431,6 +441,9 @@ export interface CreateDraftResultOptions {
   rulesetVersion?: string;
   setup: SetupData;
   omamoriName: string | null;
+  guest?: GuestAgentData | null;
+  guestHash?: string | null;
+  guestAvatarPath?: string | null;
   logs: ActionLogEntry[];
   finishedAtIso?: string;
 }
@@ -445,6 +458,9 @@ export function createDraftResult(options: CreateDraftResultOptions): DraftResul
     rulesetVersion = '1.0.0',
     setup,
     omamoriName,
+    guest = null,
+    guestHash = null,
+    guestAvatarPath = null,
     logs,
     finishedAtIso = new Date().toISOString(),
   } = options;
@@ -459,6 +475,8 @@ export function createDraftResult(options: CreateDraftResultOptions): DraftResul
   let fumbleCount = 0;
   let omamoriUsedFloor: number | null = null;
   let omamoriUsedExcuse: string | null = null;
+  let companionAssistFloor: number | null = null;
+  let companionAssistEventId: string | null = null;
 
   for (const log of logs) {
     if (log.final_rank === 'critical') criticalCount++;
@@ -466,6 +484,10 @@ export function createDraftResult(options: CreateDraftResultOptions): DraftResul
     if (log.omamori_used) {
       omamoriUsedFloor = log.floor;
       omamoriUsedExcuse = log.omamori_excuse;
+    }
+    if (log.companion_assisted) {
+      companionAssistFloor = log.floor;
+      companionAssistEventId = log.event_id;
     }
   }
 
@@ -600,6 +622,7 @@ export function createDraftResult(options: CreateDraftResultOptions): DraftResul
     verification: {
       action_log_ref: `logs/${seed}_${setup.agent_id}.jsonl`,
       log_hash: logHash,
+      ...(guestHash ? { guest_hash: guestHash } : {}),
       replayable: true,
     },
     extensions: {
@@ -611,6 +634,23 @@ export function createDraftResult(options: CreateDraftResultOptions): DraftResul
         floor: omamoriUsedFloor,
         excuse: omamoriUsedExcuse,
       },
+      ...(guest
+        ? {
+            companion: {
+              agent_id: guest.agent.id,
+              agent_name: guest.agent.name,
+              title: guest.agent.title,
+              target_axis: guest.gameplay.assist.target_axis,
+              assisted: companionAssistFloor !== null,
+              assist_floor: companionAssistFloor,
+              assist_event_id: companionAssistEventId,
+              assist_dialogue: guest.dialogues.on_assist,
+              guest_avatar_file: guestAvatarPath ?? 'guest_avatar.webp',
+              appearance_prompt: guest.visuals.appearance_prompt,
+              highlight_poses: guest.visuals.highlight_poses,
+            },
+          }
+        : {}),
     },
   };
 }

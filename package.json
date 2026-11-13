@@ -13,7 +13,8 @@
     "mini-dungeon": "bun run packages/games/mini-dungeon/src/cli.ts",
     "sim": "bun run packages/games/mini-dungeon/scripts/run-sim.ts",
     "render:sample": "bun run packages/result-card-cli/src/index.ts render examples/sample_ai_w46/result.json --out examples/sample_ai_w46/out --json",
-    "validate:sample": "bun run packages/result-card-cli/src/index.ts validate examples/sample_ai_w46/result.json --json"
+    "validate:sample": "bun run packages/result-card-cli/src/index.ts validate examples/sample_ai_w46/result.json --json",
+    "export-guest": "bun run packages/result-card-cli/src/index.ts export-guest"
   },
   "devDependencies": {
     "@types/bun": "^1.4.4",

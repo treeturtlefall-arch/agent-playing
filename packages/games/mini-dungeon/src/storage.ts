@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import type { ActionLogEntry, CliState, DraftResultCard } from './types.js';
+import type { ActionLogEntry, CliState, DraftResultCard, GuestAgentData } from './types.js';
 
 export const DEFAULT_RUN_DIR = './runs/current';
 
@@ -11,6 +11,30 @@ export function resolveRunDir(customRunDir?: string): string {
 
 export function getStatePath(runDir: string): string {
   return path.join(runDir, 'state.json');
+}
+
+export function getGuestPath(runDir: string): string {
+  return path.join(runDir, 'guest.json');
+}
+
+export function saveGuest(runDir: string, guest: GuestAgentData): string {
+  fs.mkdirSync(runDir, { recursive: true });
+  const p = getGuestPath(runDir);
+  fs.writeFileSync(p, JSON.stringify(guest, null, 2), 'utf8');
+  return p;
+}
+
+export function loadGuest(runDir: string): GuestAgentData | null {
+  const p = getGuestPath(runDir);
+  if (!fs.existsSync(p)) {
+    return null;
+  }
+  const content = fs.readFileSync(p, 'utf8');
+  try {
+    return JSON.parse(content) as GuestAgentData;
+  } catch (err) {
+    throw new Error(`Corrupted guest file at ${p}: ${(err as Error).message}`);
+  }
 }
 
 export function getLogsDir(runDir: string): string {

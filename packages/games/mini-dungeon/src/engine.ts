@@ -1,4 +1,5 @@
 import { generateDungeon } from './generator.js';
+import { shouldTriggerCompanionAssist, validateGuestAgent } from './guest.js';
 import {
   applyRankToHp,
   calculateCheck,
@@ -14,6 +15,7 @@ import {
   type ChoiceKey,
   type ChoiceOption,
   type DungeonFloor,
+  type GuestAgentData,
   type ResolvedFloorCheck,
   type SetupData,
 } from './types.js';
@@ -26,6 +28,9 @@ export interface DungeonRunState {
   omamoriUsed: boolean;
   omamoriUsedFloor: number | null;
   omamoriUsedExcuse: string | null;
+  guest?: GuestAgentData | null;
+  companionAssisted?: boolean;
+  companionAssistFloor?: number | null;
   currentFloor: number;
   currentHp: number;
   isFinished: boolean;
@@ -37,18 +42,27 @@ export interface InitRunOptions {
   seed: string;
   setup: SetupData;
   omamoriName?: string | null;
+  guest?: GuestAgentData | null;
   rulesetVersion?: string;
   skipValidation?: boolean;
 }
 
 export function initRun(options: InitRunOptions): DungeonRunState {
-  const { seed, setup, omamoriName = null, rulesetVersion = '1.0.0', skipValidation = false } = options;
+  const {
+    seed,
+    setup,
+    omamoriName = null,
+    guest = null,
+    rulesetVersion = '1.0.0',
+    skipValidation = false,
+  } = options;
 
   if (!seed || typeof seed !== 'string' || seed.trim().length === 0) {
     throw new Error('Seed must be a non-empty string');
   }
 
   let validatedSetup = setup;
+  let validatedGuest = guest;
   if (!skipValidation) {
     // 多層防御: エンジン層でも setup.json の整合性を検証
     const setupValidation = validateSetup(setup);
@@ -56,6 +70,14 @@ export function initRun(options: InitRunOptions): DungeonRunState {
       throw new Error(`Invalid setup data: ${setupValidation.errors?.join(', ')}`);
     }
     validatedSetup = setupValidation.data;
+
+    if (guest) {
+      const guestValidation = validateGuestAgent(guest);
+      if (!guestValidation.success || !guestValidation.data) {
+        throw new Error(`Invalid guest data: ${guestValidation.errors?.join(', ')}`);
+      }
+      validatedGuest = guestValidation.data;
+    }
   }
 
   const floors = generateDungeon(seed.trim(), rulesetVersion);
@@ -68,6 +90,13 @@ export function initRun(options: InitRunOptions): DungeonRunState {
     omamoriUsed: false,
     omamoriUsedFloor: null,
     omamoriUsedExcuse: null,
+    ...(validatedGuest
+      ? {
+          guest: validatedGuest,
+          companionAssisted: false,
+          companionAssistFloor: null,
+        }
+      : {}),
     currentFloor: 1,
     currentHp: INITIAL_HP,
     isFinished: false,
@@ -90,6 +119,7 @@ export interface ResolveFloorCheckOptions {
   rulesetVersion?: string;
   currentHp: number;
   aptitude: SetupData['aptitude'];
+  companionAssist?: boolean;
   reason?: string;
 }
 
@@ -97,7 +127,16 @@ export interface ResolveFloorCheckOptions {
  * フロアと選択肢に対する判定計算（保留状態の純粋生成）
  */
 export function resolveFloorCheck(options: ResolveFloorCheckOptions): ResolvedFloorCheck {
-  const { floor, choiceKey, seed, rulesetVersion = '1.0.0', currentHp, aptitude, reason } = options;
+  const {
+    floor,
+    choiceKey,
+    seed,
+    rulesetVersion = '1.0.0',
+    currentHp,
+    aptitude,
+    companionAssist = false,
+    reason,
+  } = options;
   const choice = floor.event.choices.find((c) => c.key === choiceKey);
   if (!choice) {
     throw new Error(
@@ -116,6 +155,7 @@ export function resolveFloorCheck(options: ResolveFloorCheckOptions): ResolvedFl
     choiceAxis: choice.axis,
     aptitude,
     dice: [die1, die2],
+    companionAssist,
   });
 
   const { hpDelta, newHp } = applyRankToHp(currentHp, calc.raw_rank);
@@ -127,6 +167,7 @@ export function resolveFloorCheck(options: ResolveFloorCheckOptions): ResolvedFl
     choice: choice.key,
     choice_axis: choice.axis,
     calc,
+    ...(companionAssist ? { companion_assisted: true } : {}),
     omamori_used: false,
     omamori_excuse: null,
     final_rank: calc.raw_rank,
@@ -190,6 +231,7 @@ export function createActionLogEntry(
     choice_axis: resolved.choice_axis,
     s_act: resolved.calc.s_act,
     s_eff: resolved.calc.s_eff,
+    ...(resolved.companion_assisted ? { companion_assisted: true } : {}),
     dice: resolved.calc.dice,
     dice_total: resolved.calc.dice_total,
     skill_mod: resolved.calc.skill_mod,
@@ -220,6 +262,12 @@ export function resolveChoice(
     throw new Error(`Cannot resolve choice: run is already finished or invalid floor ${state.currentFloor}`);
   }
 
+  const companionAssist = shouldTriggerCompanionAssist(
+    floor,
+    state.guest,
+    Boolean(state.companionAssisted)
+  );
+
   return resolveFloorCheck({
     floor,
     choiceKey,
@@ -227,6 +275,7 @@ export function resolveChoice(
     rulesetVersion: state.rulesetVersion,
     currentHp: state.currentHp,
     aptitude: state.setup.aptitude,
+    companionAssist,
   });
 }
 
@@ -272,6 +321,11 @@ export function commitFloor(
 
   state.logs.push(logEntry);
   state.currentHp = resolved.hp_after;
+
+  if (resolved.companion_assisted) {
+    state.companionAssisted = true;
+    state.companionAssistFloor = resolved.floor;
+  }
 
   if (resolved.omamori_used) {
     state.omamoriUsed = true;

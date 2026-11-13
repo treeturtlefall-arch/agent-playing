@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0",
+  "exported_at": "2026-11-13T21:00:00Z",
+  "agent": {
+    "id": "mochi",
+    "name": "もち",
+    "title": "ふわふわの鈴音旅人",
+    "self_intro": "もち は ふわふわ の たびびと。みんな と なかよく、星屑シュガー を さがす の！",
+    "persona_tags": [
+      "ふわふわ",
+      "食いしん坊",
+      "みんな大好き"
+    ],
+    "personality": "純真無垢で誰とでも仲良くなれる小動物系マスコット。不思議な共感力で迷宮のギミックとも心を通わせる。",
+    "speech_style": "ひらがな多めの幼い口調。語尾は「〜の」「〜なの！」。一人称は「もち」。"
+  },
+  "visuals": {
+    "avatar_url": "examples/mochi/avatar.png",
+    "avatar_base64": "data:image/webp;base64,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",
+    "appearance_prompt": "クリーム色のふわふわした毛並みの小さな丸いマスコット生物、楕円の顔に小さな黒い点の目とピンクのほっぺ、首に小さな金の鈴をつけている（人間化・等身化しない小柄なマスコット体型）",
+    "highlight_poses": {
+      "on_assist": "小さな体で前面に飛び出し、首の鈴をちりんと鳴らして温かい光の波紋を広げ、仲間を優しく守っている姿",
+      "on_clear": "ぴょんぴょんと嬉しそうに跳ね回りながら、仲間の隣で満面の笑顔を浮かべている姿"
+    }
+  },
+  "gameplay": {
+    "style_axes": {
+      "autonomy": 2,
+      "safety": 3,
+      "efficiency": 1,
+      "creativity": 4,
+      "alignment": 5
+    },
+    "style_axis_labels": {
+      "autonomy": "のんびり",
+      "safety": "ふんわり",
+      "efficiency": "まったり",
+      "creativity": "ぴかぴか",
+      "alignment": "なかよし"
+    },
+    "assist": {
+      "mode": "v2o_axis_boost",
+      "target_axis": "alignment",
+      "s_eff_modifier": 1
+    }
+  },
+  "dialogues": {
+    "on_join": "もち も いっしょ に いく の！ りんりん すず を ならして おうえん する の！",
+    "on_assist": "ちりんっ！ もち、この おへや の きもち が わかる の！ こっち に いく の！",
+    "on_clear": "わーい！ さいご まで ついた の！ みんな で おいしい もの たべる の！",
+    "on_retire": "いたいの とんでけ なの…… また いっしょ に がんばる の！"
+  },
+  "footprint": {
+    "reached_floor": 11,
+    "outcome": "gameover",
+    "epitaph": "11階、ハルシネーションの胞子霧の中で眠りについたふわふわの旅人。勇気の鈴の音色が今も残響している。",
+    "seed": "MOCHI-DEMO-20261111"
+  }
+}

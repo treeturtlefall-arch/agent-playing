@@ -2,6 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { captureScreenshot, findChromiumPath, getLastScreenshotError, getLastScreenshotPath } from './browser.js';
+import { exportGuestAgent, type GuestMetaInput } from './export-guest.js';
 import { generateShareText } from './share.js';
 import { renderCardHtml } from './template.js';
 import type { RenderResult, ResultCardData } from './types.js';
@@ -282,13 +283,83 @@ async function handleRender(
   return result.ok ? 0 : 1;
 }
 
+async function handleExportGuest(
+  positional: string[],
+  options: Record<string, string | boolean>,
+  isJson: boolean
+): Promise<number> {
+  const resultFile = positional[0];
+  const metaFile = options['meta'];
+  if (!resultFile) {
+    printError(
+      'Target result.json path is required: result-card export-guest <path/to/result.json> --meta <path/to/guest_meta.json>',
+      1,
+      isJson
+    );
+    return 1;
+  }
+  if (!metaFile || typeof metaFile !== 'string') {
+    printError('Option --meta <path/to/guest_meta.json> is required', 1, isJson);
+    return 1;
+  }
+
+  const metaAbsPath = path.resolve(metaFile);
+  if (!fs.existsSync(metaAbsPath)) {
+    printError(`Meta file not found: ${metaAbsPath}`, 2, isJson);
+    return 2;
+  }
+
+  let meta: GuestMetaInput;
+  try {
+    meta = JSON.parse(fs.readFileSync(metaAbsPath, 'utf8')) as GuestMetaInput;
+  } catch (err) {
+    printError(`Failed to parse meta JSON: ${(err as Error).message}`, 2, isJson);
+    return 2;
+  }
+
+  const res = await exportGuestAgent({
+    resultPath: resultFile,
+    meta,
+    avatarPath: typeof options['avatar'] === 'string' ? options['avatar'] : undefined,
+    outPath: typeof options['out'] === 'string' ? options['out'] : undefined,
+  });
+
+  if (!res.ok) {
+    printOutput({ ok: false, errors: res.errors }, isJson, () => {
+      console.error(`❌ ゲストデータのエクスポートに失敗しました:`);
+      for (const err of res.errors ?? []) {
+        console.error(`  - ${err}`);
+      }
+    });
+    return 1;
+  }
+
+  printOutput(
+    {
+      ok: true,
+      out_path: res.out_path,
+      agent_id: res.agent_id,
+      target_axis: res.target_axis,
+      avatar_base64_length: res.avatar_base64_length,
+    },
+    isJson,
+    () => {
+      console.log(`🤝 ゲスト共有データ（guest.json）を出力しました！`);
+      console.log(`📄 出力先: ${res.out_path}`);
+      console.log(`🆔 ID: ${res.agent_id} | 得意軸: ${res.target_axis}`);
+      console.log(`🖼️ 256px WebP Base64長: ${res.avatar_base64_length} chars`);
+    }
+  );
+  return 0;
+}
+
 export async function runCli(argv: string[]): Promise<number> {
   const { command, positional, options } = parseCliArgs(argv);
   const isJson = Boolean(options['json']);
 
   if (options['help'] || !command) {
     if (isJson) {
-      console.log(JSON.stringify({ ok: true, commands: ['render', 'validate'] }));
+      console.log(JSON.stringify({ ok: true, commands: ['render', 'validate', 'export-guest'] }));
     } else {
       console.log(`
 Result Card CLI (Step C Renderer v0.9)
@@ -296,6 +367,7 @@ Result Card CLI (Step C Renderer v0.9)
 Usage:
   result-card render <path/to/result.json> [--out <dir>] [--html-only] [--json]
   result-card validate <path/to/result.json> [--json]
+  result-card export-guest <path/to/result.json> --meta <path/to/guest_meta.json> [--avatar <path>] [--out <path>] [--json]
       `);
     }
     return 0;
@@ -306,6 +378,8 @@ Usage:
       return await handleValidate(positional, options, isJson);
     case 'render':
       return await handleRender(positional, options, isJson);
+    case 'export-guest':
+      return await handleExportGuest(positional, options, isJson);
     default:
       printError(`Unknown command '${command}'`, 1, isJson);
       return 1;

@@ -2,6 +2,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { generateDungeon } from './generator.js';
 import {
+  computeGuestHash,
+  shouldTriggerCompanionAssist,
+  validateGuestAgent,
+} from './guest.js';
+import {
   applyRankToHp,
   calculateCheck,
   canUseOmamori,
@@ -10,16 +15,18 @@ import {
 } from './mechanics.js';
 import { createFloorPRNG } from './prng.js';
 import {
+  getGuestPath,
   getLogFilePath,
   getResultDraftPath,
   getStatePath,
+  loadGuest,
   loadState,
   readLogEntries,
   readRawLogContent,
   resolveRunDir,
 } from './storage.js';
 import { computeLogHash } from './summary.js';
-import type { ActionLogEntry, CliState, VerifyResult } from './types.js';
+import type { ActionLogEntry, CliState, GuestAgentData, VerifyResult } from './types.js';
 
 export interface VerifyRunOptions {
   runDir?: string;
@@ -45,7 +52,42 @@ export function verifyRun(options?: VerifyRunOptions): VerifyResult {
     };
   }
 
-  const { seed, ruleset_version = '1.0.0', setup, omamori_name } = state;
+  const { seed, ruleset_version = '1.0.0', setup, omamori_name, guest_hash } = state;
+
+  // 1.5. guest.json（同行者データ）の読み込みとハッシュ検証
+  let guest: GuestAgentData | null = null;
+  let computedGuestHash: string | null = null;
+  const guestFileExists = fs.existsSync(getGuestPath(runDir));
+
+  if (guest_hash || guestFileExists) {
+    if (guest_hash && !guestFileExists) {
+      errors.push(
+        `guest_hash '${guest_hash}' is recorded in state.json, but guest.json is missing in runDir`
+      );
+    } else if (!guest_hash && guestFileExists) {
+      errors.push('guest.json exists in runDir, but guest_hash is not recorded in state.json');
+    }
+
+    if (guestFileExists) {
+      try {
+        const rawGuest = loadGuest(runDir);
+        const validation = validateGuestAgent(rawGuest);
+        if (!validation.success || !validation.data) {
+          errors.push(`Invalid guest.json: ${validation.errors?.join(', ')}`);
+        } else {
+          guest = validation.data;
+          computedGuestHash = computeGuestHash(guest);
+          if (guest_hash && computedGuestHash !== guest_hash) {
+            errors.push(
+              `guest_hash mismatch: state.json recorded '${guest_hash}', computed '${computedGuestHash}'`
+            );
+          }
+        }
+      } catch (err) {
+        errors.push(`Failed to load guest.json: ${(err as Error).message}`);
+      }
+    }
+  }
 
   // 2. ログファイルの読み込み
   const rawLogContent = readRawLogContent(runDir, seed, setup.agent_id);
@@ -85,6 +127,8 @@ export function verifyRun(options?: VerifyRunOptions): VerifyResult {
   // 5. リプレイ検証ループ
   let expectedHp = INITIAL_HP;
   let omamoriUsedAlready = false;
+  let companionAssistedAlready = false;
+  let companionAssistFloor: number | null = null;
 
   for (let i = 0; i < logEntries.length; i++) {
     const log = logEntries[i]!;
@@ -152,6 +196,24 @@ export function verifyRun(options?: VerifyRunOptions): VerifyResult {
       );
     }
 
+    // V2o 同行者アシストの発動判定
+    const expectedCompanionAssist = shouldTriggerCompanionAssist(
+      floorDef,
+      guest,
+      companionAssistedAlready
+    );
+    if (Boolean(log.companion_assisted) !== expectedCompanionAssist) {
+      errors.push(
+        `Floor ${log.floor}: companion_assisted mismatch (log: ${Boolean(
+          log.companion_assisted
+        )}, expected: ${expectedCompanionAssist})`
+      );
+    }
+    if (expectedCompanionAssist) {
+      companionAssistedAlready = true;
+      companionAssistFloor = log.floor;
+    }
+
     // Weakest Link 判定計算の再計算
     const calc = calculateCheck({
       floor: log.floor,
@@ -161,6 +223,7 @@ export function verifyRun(options?: VerifyRunOptions): VerifyResult {
       choiceAxis: matchedChoice.axis,
       aptitude: setup.aptitude,
       dice: [expectedDice.die1, expectedDice.die2],
+      companionAssist: expectedCompanionAssist,
     });
 
     if (log.s_act !== calc.s_act) {
@@ -260,6 +323,16 @@ export function verifyRun(options?: VerifyRunOptions): VerifyResult {
           );
         }
       }
+      if (
+        computedGuestHash &&
+        verification &&
+        typeof verification.guest_hash === 'string' &&
+        verification.guest_hash !== computedGuestHash
+      ) {
+        errors.push(
+          `guest_hash mismatch in result_draft.json: recorded '${verification.guest_hash}', computed '${computedGuestHash}'`
+        );
+      }
     } catch (err) {
       errors.push(`Failed to read/parse result_draft.json: ${(err as Error).message}`);
     }
@@ -279,6 +352,12 @@ export function verifyRun(options?: VerifyRunOptions): VerifyResult {
     agent_id: setup.agent_id,
     floor_count: logEntries.length,
     log_hash: computedLogHash,
+    ...(computedGuestHash
+      ? {
+          guest_hash: computedGuestHash,
+          companion_assist_floor: companionAssistFloor,
+        }
+      : {}),
     outcome: finalOutcome,
     errors: errors.length > 0 ? errors : undefined,
   };

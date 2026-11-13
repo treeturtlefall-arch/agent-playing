@@ -214,6 +214,7 @@
       "properties": {
         "action_log_ref": { "type": ["string", "null"] },
         "log_hash": { "type": ["string", "null"] },
+        "guest_hash": { "type": ["string", "null"] },
         "replayable": { "type": "boolean" }
       },
       "additionalProperties": false

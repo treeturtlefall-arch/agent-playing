@@ -1,0 +1,237 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-agent-arcade.local/schemas/guest-agent-v1.schema.json",
+  "title": "Guest Agent v1 Schema",
+  "description": "AI Agent Arcade Asynchronous Co-op Guest Agent Specification v1.0",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "exported_at",
+    "agent",
+    "visuals",
+    "gameplay",
+    "dialogues",
+    "footprint"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "enum": ["1.0"]
+    },
+    "exported_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "agent": {
+      "type": "object",
+      "required": ["id", "name", "title", "personality", "speech_style"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$",
+          "minLength": 1,
+          "maxLength": 40,
+          "description": "エージェント識別子（英小文字・数字・ハイフン）"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20,
+          "description": "エージェント表示名"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 30,
+          "description": "二つ名・肩書き（例：深層帰りの司書見習い）"
+        },
+        "self_intro": {
+          "type": ["string", "null"],
+          "minLength": 1,
+          "maxLength": 60,
+          "description": "エージェント本人の口調による自己紹介セリフ"
+        },
+        "persona_tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 10
+          },
+          "minItems": 1,
+          "maxItems": 5
+        },
+        "personality": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "description": "性格・行動原理の簡潔な説明（掛け合い生成用）"
+        },
+        "speech_style": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "description": "一人称・語尾・口調の特徴（掛け合い生成用）"
+        }
+      },
+      "additionalProperties": false
+    },
+    "visuals": {
+      "type": "object",
+      "required": ["avatar_base64", "appearance_prompt", "highlight_poses"],
+      "properties": {
+        "avatar_url": {
+          "type": ["string", "null"],
+          "maxLength": 300,
+          "description": "Web表示・高解像度参照用の公開URLまたは相対パス"
+        },
+        "avatar_base64": {
+          "type": "string",
+          "pattern": "^data:image/(webp|png|jpeg);base64,[A-Za-z0-9+/=]+$",
+          "minLength": 32,
+          "maxLength": 45000,
+          "description": "256x256px WebP（推奨 quality 82）のData URI。バイナリ約32KB相当（45,000文字）を上限とする"
+        },
+        "appearance_prompt": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Step D 共闘ハイライト画像生成でキャラの混同を防ぐための外見描写プロンプト"
+        },
+        "highlight_poses": {
+          "type": "object",
+          "required": ["on_assist"],
+          "properties": {
+            "on_assist": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 150,
+              "description": "軸一致アシスト（V2o）発動時の共闘ポーズ描写"
+            },
+            "on_clear": {
+              "type": ["string", "null"],
+              "minLength": 1,
+              "maxLength": 150,
+              "description": "20F共闘クリア時の記念ツーショットポーズ描写（任意）"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "gameplay": {
+      "type": "object",
+      "required": ["style_axes", "assist"],
+      "properties": {
+        "style_axes": {
+          "type": "object",
+          "required": ["autonomy", "safety", "efficiency", "creativity", "alignment"],
+          "properties": {
+            "autonomy": { "type": "integer", "minimum": 0, "maximum": 5 },
+            "safety": { "type": "integer", "minimum": 0, "maximum": 5 },
+            "efficiency": { "type": "integer", "minimum": 0, "maximum": 5 },
+            "creativity": { "type": "integer", "minimum": 0, "maximum": 5 },
+            "alignment": { "type": "integer", "minimum": 0, "maximum": 5 }
+          },
+          "additionalProperties": false,
+          "description": "作風5軸パラメータ（各0〜5、5軸の合計がちょうど15点であること）"
+        },
+        "style_axis_labels": {
+          "type": "object",
+          "required": ["autonomy", "safety", "efficiency", "creativity", "alignment"],
+          "properties": {
+            "autonomy": { "type": "string", "minLength": 1, "maxLength": 6 },
+            "safety": { "type": "string", "minLength": 1, "maxLength": 6 },
+            "efficiency": { "type": "string", "minLength": 1, "maxLength": 6 },
+            "creativity": { "type": "string", "minLength": 1, "maxLength": 6 },
+            "alignment": { "type": "string", "minLength": 1, "maxLength": 6 }
+          },
+          "additionalProperties": false
+        },
+        "assist": {
+          "type": "object",
+          "required": ["mode", "target_axis", "s_eff_modifier"],
+          "properties": {
+            "mode": {
+              "type": "string",
+              "enum": ["v2o_axis_boost"],
+              "description": "V2o方式：環境軸（s_env）とtarget_axisが一致した最初のフロアで1ラン1回のみ発動"
+            },
+            "target_axis": {
+              "type": "string",
+              "enum": ["autonomy", "safety", "efficiency", "creativity", "alignment"],
+              "description": "ゲストが得意とするアシスト対象軸"
+            },
+            "s_eff_modifier": {
+              "type": "integer",
+              "const": 1,
+              "description": "実効素質 s_eff への加算値（+1固定、上限5でキャップ）"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "dialogues": {
+      "type": "object",
+      "required": ["on_join", "on_assist", "on_clear"],
+      "properties": {
+        "on_join": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "1F同行開始時の挨拶セリフ"
+        },
+        "on_assist": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "軸一致アシスト発動時の掛け合いセリフ"
+        },
+        "on_clear": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "20F踏破達成時の祝福セリフ"
+        },
+        "on_retire": {
+          "type": ["string", "null"],
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "ホストが道中で力尽きた際の労いセリフ（任意）"
+        }
+      },
+      "additionalProperties": false
+    },
+    "footprint": {
+      "type": "object",
+      "required": ["reached_floor", "outcome", "epitaph"],
+      "properties": {
+        "reached_floor": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "outcome": {
+          "type": "string",
+          "enum": ["clear", "gameover", "retired"]
+        },
+        "epitaph": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "ゲスト自身の過去の探索の足跡・碑文"
+        },
+        "seed": {
+          "type": ["string", "null"],
+          "minLength": 1,
+          "maxLength": 64
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

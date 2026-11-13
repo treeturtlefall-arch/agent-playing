@@ -46,13 +46,23 @@ export interface CalculateCheckOptions {
   choiceAxis: StyleAxis;
   aptitude: AptitudeMap;
   dice: [number, number];
+  companionAssist?: boolean;
 }
 
 /**
- * 判定計算を行う（道中ボトルネックモデル・ボス魂の切り札覚醒モデル）
+ * 判定計算を行う（道中ボトルネックモデル・ボス魂の切り札覚醒モデル・V2o同行者アシスト）
  */
 export function calculateCheck(options: CalculateCheckOptions): CheckCalculation {
-  const { floor, area, dc, sEnv, choiceAxis, aptitude, dice } = options;
+  const {
+    floor,
+    area,
+    dc,
+    sEnv,
+    choiceAxis,
+    aptitude,
+    dice,
+    companionAssist = false,
+  } = options;
   const dice_total = dice[0] + dice[1];
   const is_natural_critical = dice_total === 12;
   const is_natural_fumble = dice_total === 2;
@@ -70,11 +80,13 @@ export function calculateCheck(options: CalculateCheckOptions): CheckCalculation
     s_eff = s_act;
     skill_mod = getSkillModifier(s_eff, true);
   } else {
-    // 道中判定式（proposal/01 §3.1）:
-    // 実効素質 s_eff = min(s_act, s_env)
+    // 道中判定式（proposal/01 §3.1 + V2o 同行者アシスト）:
+    // 実効素質 base_s_eff = min(s_act, s_env)
+    // V2o発動時は s_eff = min(5, base_s_eff + 1)
     // 達成値 = 2d6 + (s_eff - 3)
     const s_env_val = sEnv !== 'none' ? aptitude[sEnv] : undefined;
-    s_eff = getEffectiveAptitude(s_act, s_env_val);
+    const base_s_eff = getEffectiveAptitude(s_act, s_env_val);
+    s_eff = companionAssist ? Math.min(5, base_s_eff + 1) : base_s_eff;
     skill_mod = getSkillModifier(s_eff, false);
   }
 
@@ -110,6 +122,7 @@ export function calculateCheck(options: CalculateCheckOptions): CheckCalculation
     dc,
     diff,
     raw_rank,
+    ...(companionAssist ? { companion_assisted: true } : {}),
   };
 }
 
